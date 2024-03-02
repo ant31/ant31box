@@ -3,7 +3,7 @@ import logging
 import click
 import uvicorn
 
-from ant31box.config import LOG_LEVELS, Config
+from ant31box.config import LOG_LEVELS, config as confload, Config
 from ant31box.init import init
 
 LEVEL_CHOICES = click.Choice(list(LOG_LEVELS.keys()))
@@ -78,7 +78,7 @@ def server(
     log_level: str,
     log_config: str,
 ) -> None:
-    _config = Config.auto_config(config)
+    _config = confload(config)
     if host:
         _config.server.host = host
     if port:

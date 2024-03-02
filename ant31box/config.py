@@ -4,7 +4,7 @@ import json
 import logging
 import logging.config
 import os
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, Generic, Type, TypeVar, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -50,7 +50,6 @@ class BaseConfig(BaseModel):
 
 
 class AppConfigSchema(BaseConfig):
-    name: str = Field(default="ant31box-defau")
     env: str = Field(default="dev")
     prometheus_dir: str = Field(default="/tmp/prometheus")
 
@@ -108,18 +107,19 @@ ENVPREFIX = "ANT31BOX"
 
 # Main configuration schema
 class ConfigSchema(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix=f"{ENVPREFIX}_", env_nested_delimiter="__", case_sensitive=False)
+    model_config = SettingsConfigDict(env_prefix=f"{ENVPREFIX}_", env_nested_delimiter="__", case_sensitive=False, extra="allow")
     app: AppConfigSchema = Field(default_factory=AppConfigSchema)
     logging: LoggingConfigSchema = Field(default_factory=LoggingConfigSchema)
     server: FastAPIConfigSchema = Field(default_factory=FastAPIConfigSchema)
     sentry: SentryConfigSchema = Field(default_factory=SentryConfigSchema)
-
+    name: str = Field(default="ant31box")
 
 TConfigSchema = TypeVar("TConfigSchema", bound=ConfigSchema)  # pylint: disable= invalid-name
 
 
 class Config(Generic[TConfigSchema]):
     _env_prefix = ENVPREFIX
+    __config_class__: Type[ConfigSchema] = ConfigSchema
 
     def __init__(self, conf: TConfigSchema):
         self.loaded = False
@@ -146,12 +146,13 @@ class Config(Generic[TConfigSchema]):
     def sentry(self) -> SentryConfigSchema:
         return self.conf.sentry
 
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self.conf, name)
-
     @property
     def app(self) -> AppConfigSchema:
         return self.conf.app
+
+    @property
+    def name(self) -> str:
+        return self.conf.name
 
     def load(self, force=True) -> bool:
         if not self.loaded or force:
@@ -186,31 +187,31 @@ class Config(Generic[TConfigSchema]):
             if loaded_config is not None:
                 if (
                     "loggers" in loaded_config
-                    and not self.app.name in loaded_config["loggers"]
+                    and not self.name in loaded_config["loggers"]
                     and "ant31box" in loaded_config["loggers"]
                 ):
-                    loaded_config["loggers"][self.app.name] = loaded_config["loggers"]["ant31box"]
+                    loaded_config["loggers"][self.name] = loaded_config["loggers"]["ant31box"]
                 logging.config.dictConfig(loaded_config)
 
         if log_level is not None:
             if isinstance(log_level, str):
                 log_level = LOG_LEVELS[log_level.lower()]
-            logging.getLogger(self.app.name).setLevel(log_level)
+            logging.getLogger(self.name).setLevel(log_level)
             logging.getLogger("ant31box").setLevel(log_level)
             logging.getLogger("root").setLevel(log_level)
 
     @classmethod
-    def from_yaml(cls, file_path: str) -> "Config":
+    def from_yaml(cls, file_path: str) -> Self:
         with open(file_path, "r", encoding="utf-8") as file:
             config_dict = yaml.safe_load(file)
-        return cls(ConfigSchema.model_validate(config_dict))
+        return cls(cls.__config_class__.model_validate(config_dict))
 
     @classmethod
-    def default_config(cls) -> "Config":
-        return cls(ConfigSchema())
+    def default_config(cls) -> Self:
+        return cls(cls.__config_class__())
 
     @classmethod
-    def auto_config(cls, path: str | None = None) -> "Config":
+    def auto_config(cls, path: str | None = None) -> Self:
         if path:
             paths = [path]
         else:
@@ -250,14 +251,16 @@ T = TypeVar("T", bound=Config)
 # pylint: disable=super-init-not-called
 class GConfig(Generic[T]):
     __instance__: T | None = None
-    __conf_class: Type[T]
+    __conf_class__: Type[T] | None = None
 
     def __init__(self, path: str | None = None):
         self.path = path
 
     def __new__(cls, path: str | None = None) -> T:
         if cls.__instance__ is None:
-            cls.__instance__ = cls.__conf_class.auto_config(path)
+            if cls.__conf_class__ is None:
+                raise ValueError("conf_class not set")
+            cls.__instance__ = cls.__conf_class__.auto_config(path)
         return cls.__instance__
 
     @classmethod
@@ -266,7 +269,7 @@ class GConfig(Generic[T]):
 
     @classmethod
     def set_conf_class(cls, conf_class: Type[T]) -> None:
-        cls.__conf_class = conf_class
+        cls.__conf_class__ = conf_class
 
 
 def config(path: str | None = None, confclass: Type[T] = Config, reload: bool = False) -> T:
