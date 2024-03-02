@@ -119,7 +119,7 @@ def serve_from_config(conf: Config, server_class: Type[Server] = Server) -> Fast
     if not issubclass(server_class, Server):
         raise TypeError(f"server must be a subclass or instance of {Server}")
 
-    server = Server(conf.server, conf.app.name, conf.app.env)
+    server = server_class(conf.server, conf.name, conf.app.env)
     return server.app
 
 
