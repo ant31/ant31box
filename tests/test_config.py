@@ -15,15 +15,15 @@ def test_config_fields():
 
 
 def test_config_reinit():
-    conf = config().model_dump()
+    conf = config().dump()
     _ = config(reload=True)
-    assert config().model_dump() == conf
+    assert config().dump() == conf
     # Changes are ignored without reinit
     config("tests/data/config-2.yaml")
-    assert config().model_dump() == conf
+    assert config().dump() == conf
     # Changes are applied after reinit
     config("tests/data/config-2.yaml", reload=True)
-    assert config().model_dump() != conf
+    assert config().dump() != conf
 
 
 def test_config_path_load():

@@ -3,7 +3,8 @@ import logging
 import click
 import uvicorn
 
-from ant31box.config import LOG_LEVELS, config as confload, Config
+from ant31box.config import LOG_LEVELS, Config
+from ant31box.config import config as confload
 from ant31box.init import init
 
 LEVEL_CHOICES = click.Choice(list(LOG_LEVELS.keys()))

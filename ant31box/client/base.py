@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import logging
 from typing import Any, Generic, Literal, TypeVar
 from urllib.parse import ParseResult, urlparse
@@ -101,17 +102,26 @@ class BaseClient(Generic[T]):
             raw = await resp.read()
         except aiohttp.ClientPayloadError:
             raw = b""
-        logger.debug(
-            {
-                "query": {
-                    "url": resp.request_info.url,
-                    "params": resp.request_info,
-                    "method": resp.request_info.method,
-                    "headers": resp.request_info.headers,
-                },
-                "response": {"headers": resp.headers, "status": resp.status, "raw": raw.decode("utf-8")},
-            }
-        )
+        try:
+            logger.debug(
+                json.dumps(
+                    {
+                        "query": {
+                            "url": str(resp.request_info.url),
+                            "method": resp.request_info.method,
+                            "headers": dict(resp.request_info.headers.items()),
+                        },
+                        "response": {
+                            "headers": dict(resp.headers.items()),
+                            "status": resp.status,
+                            "raw": raw.decode("utf-8"),
+                        },
+                    },
+                    default=str,
+                )
+            )
+        except Exception:  # pylint: disable=bare-except
+            pass
 
     def _url(self, path: str, endpoint: str = "") -> str:
         """Construct the url from a relative path"""

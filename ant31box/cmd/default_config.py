@@ -1,7 +1,7 @@
 import click
 import yaml
 
-from ant31box.config import LOGGING_CONFIG, config, LoggingConfigSchema
+from ant31box.config import LOGGING_CONFIG, LoggingConfigSchema, config
 
 
 @click.command()

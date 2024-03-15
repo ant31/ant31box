@@ -4,7 +4,7 @@ import json
 import logging
 import logging.config
 import os
-from typing import Any, Generic, Type, TypeVar, Self
+from typing import Any, Generic, Self, Type, TypeVar
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -105,14 +105,26 @@ class SentryConfigSchema(BaseConfig):
 ENVPREFIX = "ANT31BOX"
 
 
+class S3ConfigSchema(BaseConfig):
+    endpoint: str = Field(default="https://s3.eu-central-1.amazonaws.com")
+    access_key: str = Field(default="")
+    secret_key: str = Field(default="")
+    region: str = Field(default="eu-central-1")
+    prefix: str = Field(default="")
+    bucket: str = Field(default="abucket")
+
+
 # Main configuration schema
 class ConfigSchema(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix=f"{ENVPREFIX}_", env_nested_delimiter="__", case_sensitive=False, extra="allow")
+    model_config = SettingsConfigDict(
+        env_prefix=f"{ENVPREFIX}_", env_nested_delimiter="__", case_sensitive=False, extra="allow"
+    )
     app: AppConfigSchema = Field(default_factory=AppConfigSchema)
     logging: LoggingConfigSchema = Field(default_factory=LoggingConfigSchema)
     server: FastAPIConfigSchema = Field(default_factory=FastAPIConfigSchema)
     sentry: SentryConfigSchema = Field(default_factory=SentryConfigSchema)
     name: str = Field(default="ant31box")
+
 
 TConfigSchema = TypeVar("TConfigSchema", bound=ConfigSchema)  # pylint: disable= invalid-name
 
@@ -271,10 +283,18 @@ class GConfig(Generic[T]):
     def set_conf_class(cls, conf_class: Type[T]) -> None:
         cls.__conf_class__ = conf_class
 
+    @classmethod
+    def instance(cls) -> T:
+        if cls.__instance__ is None:
+            raise ValueError("Instance not initialized")
+        return cls.__instance__
+
 
 def config(path: str | None = None, confclass: Type[T] = Config, reload: bool = False) -> T:
     if confclass is not None:
         GConfig[confclass].set_conf_class(confclass)
     if reload:
         GConfig[confclass].reinit()
-    return GConfig(path)
+    # load the configuration
+    _ = GConfig[confclass](path)
+    return GConfig[confclass].instance()
