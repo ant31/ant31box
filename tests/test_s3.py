@@ -6,7 +6,8 @@ import pytest
 from moto import mock_aws
 
 from ant31box.config import S3ConfigSchema
-from ant31box.s3 import S3URL, S3Client
+from ant31box.models import S3URL
+from ant31box.s3 import S3Client
 
 
 def test_s3url():
@@ -82,10 +83,10 @@ async def test_s3_download_to_file():
             a = client.upload_file(filepath=tmp.name)
             assert a.url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
         with NamedTemporaryFile() as output:
-            client.download_file(s3url=S3URL(url=a.url), dest=str(output.name))
+            client.download_file(s3url=S3URL(url=a.url).to_model(), dest=str(output.name))
             with open(output.name, "rb") as fname:
                 assert fname.read() == b"test"
-            client.download_file(s3url=S3URL(url=a.url), dest=output)
+            client.download_file(s3url=S3URL(url=a.url).to_model(), dest=output)
             output.seek(0)
             assert output.read() == b"test"
 
@@ -102,11 +103,11 @@ async def test_s3_copy_s3_s3():
             tmp.seek(0)
             src = client.upload_file(filepath=tmp.name)
             assert src.url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
-        res = client.copy_s3_to_s3(src_bucket=src.bucket, src_path=src.path, dest_bucket=bucket2, dest_prefix="copy/")
+        res = client.copy_s3_to_s3(src_bucket=src.bucket, src_path=src.key, dest_bucket=bucket2, dest_prefix="copy/")
         assert res[0].url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
         assert res[1].url == f"s3://{bucket2}/copy/titi/{Path(tmp.name).name}"
         res = client.copy_s3_to_s3(
-            src_bucket=src.bucket, src_path=src.path, dest_bucket=bucket2, dest_prefix="copy/", name_only=True
+            src_bucket=src.bucket, src_path=src.key, dest_bucket=bucket2, dest_prefix="copy/", name_only=True
         )
         assert res[0].url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
         assert res[1].url == f"s3://{bucket2}/copy/{Path(tmp.name).name}"
