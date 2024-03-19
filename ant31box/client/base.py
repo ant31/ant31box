@@ -120,7 +120,7 @@ class BaseClient(Generic[T]):
                     default=str,
                 )
             )
-        except Exception:  # pylint: disable=bare-except
+        except Exception:  # pylint: disable=broad-exception-caught
             pass
 
     def _url(self, path: str, endpoint: str = "") -> str:

@@ -1,56 +1,15 @@
 import logging
 from io import IOBase
 from pathlib import Path
-from typing import Tuple
-from urllib.parse import urlparse
+from typing import BinaryIO, Tuple
 
 import boto3
 from botocore.client import Config
-from pydantic import BaseModel, Field
 
 from ant31box.config import S3ConfigSchema
+from ant31box.models import S3URL, S3Dest
 
 logger: logging.Logger = logging.getLogger(__name__)
-
-
-class S3Dest(BaseModel):
-    bucket: str = Field(...)
-    path: str = Field(...)
-    url: str = Field(default="")
-    region: str = Field(default="")
-
-
-class S3URL:
-    def __init__(self, url: str = "", bucket: str = "", key: str = ""):
-        self.parse_url(url)
-        if bucket:
-            self.bucket = bucket
-        if key:
-            self.key = key
-
-    def to_dict(self):
-        return {
-            "bucket": self.bucket,
-            "key": self.key,
-            "url": self.url,
-        }
-
-    @property
-    def url(self):
-        return f"s3://{self.bucket}/{self.key}"
-
-    def parse_url(self, value: str):
-        if not value:
-            return
-        parsed = urlparse(value, allow_fragments=False)
-        if parsed.scheme != "s3":
-            raise ValueError(f"Invalid URL scheme {parsed.scheme}, must be 's3'")
-        self.bucket = parsed.netloc
-        self.key = parsed.path.lstrip("/")
-
-    @property
-    def filename(self) -> str:
-        return Path(self.key).name
 
 
 class S3Client:
@@ -82,24 +41,24 @@ class S3Client:
             dest = Path(filename).name
         return f"{self.prefix}{dest}"
 
-    def upload_file(self, filepath: str | IOBase, dest: str = "") -> S3Dest:
+    def upload_file(self, filepath: str | IOBase | BinaryIO, dest: str = "") -> S3Dest:
         if isinstance(filepath, str):
             path = self.buildpath(filepath, dest)
+            logger.info("upload s3 bucket='%s' file='%s' dest='%s'", self.bucket, filepath, path)
             self.client.Bucket(self.bucket).upload_file(filepath, path)
         else:
             path = dest
+            logger.info("upload s3 bucket='%s' file='%s' dest='%s'", self.bucket, filepath, path)
             self.client.Bucket(self.bucket).upload_fileobj(filepath, path)
 
-        return S3Dest(
-            bucket=self.bucket, path=path, url=S3URL(bucket=self.bucket, key=path).url, region=self.options.region
-        )
+        return S3URL(bucket=self.bucket, key=path, region=self.options.region).to_model()
 
     def s3url(self, path: str, strip: bool = True) -> S3URL:
         if strip:
             path = path.lstrip("/")
         return S3URL(bucket=self.bucket, key=path)
 
-    def download_file(self, s3url: S3URL, dest: str | Path | IOBase) -> str | IOBase:
+    def download_file(self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO) -> str | IOBase | BinaryIO:
         print(f"download uri='{s3url.url}'", f"dest='{dest}'")
         if isinstance(dest, (str, Path)):
             self.client.Bucket(s3url.bucket).download_file(s3url.key, str(dest))
@@ -128,16 +87,6 @@ class S3Client:
         self.client.meta.client.copy(copy_source, dest_bucket, dest_path)
 
         return (
-            S3Dest(
-                bucket=src_bucket,
-                path=src_path,
-                region=self.options.region,
-                url=S3URL(bucket=src_bucket, key=src_path).url,
-            ),
-            S3Dest(
-                bucket=dest_bucket,
-                path=dest_path,
-                region=self.options.region,
-                url=S3URL(bucket=dest_bucket, key=dest_path).url,
-            ),
+            S3URL(bucket=src_bucket, key=src_path, region=self.options.region).to_model(),
+            S3URL(bucket=dest_bucket, key=dest_path, region=self.options.region).to_model(),
         )
