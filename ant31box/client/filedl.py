@@ -10,7 +10,7 @@ import aiofiles
 import aioshutil as shutil
 from pydantic import BaseModel, ConfigDict, Field
 
-from ant31box.client.base import BaseClient, ClientConfig
+from ant31box.client.base import BaseClient
 from ant31box.config import S3ConfigSchema
 from ant31box.s3 import S3URL, S3Client
 
@@ -30,14 +30,11 @@ class FileInfo(BaseModel):
 
 
 class DownloadClient(BaseClient):
-    def __init__(self, config: ClientConfig | None = None, s3_config: S3ConfigSchema | None = None) -> None:
-        super().__init__(endpoint="", config=config, client_name="filedl")
+    def __init__(self, s3_config: S3ConfigSchema | None = None) -> None:
+        super().__init__(endpoint="", client_name="filedl")
         self.s3 = None
         if s3_config is not None:
             self.set_s3(s3_config)
-
-    def default_config(self) -> ClientConfig:
-        return ClientConfig()
 
     def set_s3(self, s3_config: S3ConfigSchema) -> None:
         self.s3 = S3Client(s3_config)

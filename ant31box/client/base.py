@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 import logging
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Literal, TypeVar
 from urllib.parse import ParseResult, urlparse
 
 import aiohttp
@@ -23,34 +23,23 @@ class ClientConfig(BaseModel):
     session_args: tuple[list, dict[str, Any]] = Field(default=([], {}))
 
 
-class BaseClient(Generic[T]):
+class BaseClient:
     def __init__(
         self,
         endpoint: str,
         verify_tls: bool = True,
         session_args: tuple[list, dict[str, Any]] = ([], {}),
         client_name: str = "client",
-        config: T | None = None,
     ) -> None:
         self._session: aiohttp.ClientSession | None = None
         self.client_config = ClientConfig(
             endpoint=endpoint, verify_tls=verify_tls, session_args=session_args, client_name=client_name
         )
-        self._config: T | None = config
         self._endpoint: ParseResult = self._configure_endpoint(self.client_config.endpoint)
         self._headers: dict[str, str] = {
             "Content-Type": "application/json",
             "User-Agent": f"ant31box-cli/{self.client_config.client_name}-{VERSION.app_version}",
         }
-
-    def default_config(self) -> T:
-        raise NotImplementedError
-
-    @property
-    def config(self) -> T:
-        if not self._config:
-            self._config = self.default_config()
-        return self._config
 
     @property
     def endpoint(self) -> ParseResult:
