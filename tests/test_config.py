@@ -12,6 +12,8 @@ def test_config_fields():
     assert config().server.port == 8080
     assert config().logging.level == "info"
     assert config().conf.app.env == "test"
+    assert config().conf.app.prometheus_dir == "/tmp/testprom"
+    assert config().conf.name == "ant31box-test"
 
 
 def test_config_reinit():
@@ -32,8 +34,25 @@ def test_config_path_load():
 
 
 def test_config_path_load_from_env(monkeypatch):
+    assert config(reload=True).app.env == "test"
     monkeypatch.setattr(os, "environ", {"ANT31BOX_CONFIG": "tests/data/config-2.yaml"})
     assert config(reload=True).app.env == "test-2"
+
+
+def test_config_env_precedence(monkeypatch):
+    assert config(reload=True).app.env == "test"
+    monkeypatch.setattr(
+        os, "environ", {"ANT31BOX_APP__ENV": "test-3", "ANT31BOX_CONFIG": "tests/data/test_config.yaml"}
+    )
+    # Env setting has precedence over config file
+    assert config(reload=True).app.env == "test-3"
+    # Other env are not affected
+    assert config().conf.name == "ant31box-test"
+    monkeypatch.setattr(
+        os, "environ", {"ANT31BOX_NAME": "ant31box-test-3", "ANT31BOX_CONFIG": "tests/data/test_config.yaml"}
+    )
+    assert config(reload=True).conf.name == "ant31box-test-3"
+    assert config(reload=True).conf.app.env == "test"
 
 
 def test_config_path_failed_path_fallback():

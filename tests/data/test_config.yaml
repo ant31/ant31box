@@ -1,7 +1,8 @@
+name: ant31box-test
 app:
   env: test
-  name: ant31box
-  prometheus_dir: /tmp/prometheus
+  name: ant31box-test
+  prometheus_dir: "/tmp/testprom"
 logging:
   level: info
   log_config:

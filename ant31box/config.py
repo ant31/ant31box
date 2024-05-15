@@ -216,6 +216,9 @@ class Config(Generic[TConfigSchema]):
     def from_yaml(cls, file_path: str) -> Self:
         with open(file_path, "r", encoding="utf-8") as file:
             config_dict = yaml.safe_load(file)
+        # merge init + env config
+        alreadyinit = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
+        config_dict.update(alreadyinit)
         return cls(cls.__config_class__.model_validate(config_dict))
 
     @classmethod
