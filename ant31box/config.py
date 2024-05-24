@@ -9,6 +9,7 @@ from typing import Any, Generic, Self, Type, TypeVar
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from ant31box.utilsd import deepmerge
 
 LOG_LEVELS: dict[str, int] = {
     "critical": logging.CRITICAL,
@@ -218,7 +219,8 @@ class Config(Generic[TConfigSchema]):
             config_dict = yaml.safe_load(file)
         # merge init + env config
         alreadyinit = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
-        config_dict.update(alreadyinit)
+        deepmerge(config_dict, alreadyinit)
+        logger.debug("Config loaded from %s: %s", file_path, config_dict)
         return cls(cls.__config_class__.model_validate(config_dict))
 
     @classmethod
