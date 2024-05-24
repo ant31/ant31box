@@ -51,3 +51,10 @@ server:
   override_default_routers: ["ant31box.server.api.info:router"]
   server: ant31box.server.server:Server
   token: ''
+s3:
+  access_key: 'AK'
+  bucket: ant31box
+  endpoint: https://s3.eu-central-1.amazonaws.com
+  prefix: testprefix
+  region: eu-central-1
+  secret_key: 'SK'
