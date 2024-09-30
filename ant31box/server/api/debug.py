@@ -2,7 +2,7 @@
 # pylint: disable=too-few-public-methods
 import logging
 import time
-
+import asyncio
 from fastapi import APIRouter
 
 from ant31box.server.exception import Forbidden
@@ -25,5 +25,5 @@ async def gen_error_uncatch():
 
 @router.get("/slow", tags=["debug"])
 async def slow_req():
-    time.sleep(5)
+    await asyncio.sleep(5)
     return {"ok": 200}
