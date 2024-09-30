@@ -13,18 +13,6 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 class S3Client:
-    @staticmethod
-    def _boto_args(options: S3ConfigSchema):
-        kwargs: dict = {}
-        if options.endpoint:
-            kwargs["endpoint_url"] = options.endpoint
-        if options.region:
-            kwargs["region_name"] = options.region
-        kwargs["aws_access_key_id"] = options.access_key
-        kwargs["aws_secret_access_key"] = options.secret_key
-        kwargs["config"] = Config(signature_version="s3v4")
-        return kwargs
-
     def __init__(self, options: S3ConfigSchema, bucket: str = "", prefix: str = ""):
         kwargs: dict = self._boto_args(options)
         self.options = options
@@ -35,6 +23,20 @@ class S3Client:
             prefix = options.prefix
         self.bucket: str = bucket
         self.prefix: str = prefix
+
+    @staticmethod
+    def _boto_args(options: S3ConfigSchema):
+        kwargs: dict = {}
+        if options.endpoint:
+            kwargs["endpoint_url"] = options.endpoint
+        if options.region:
+            kwargs["region_name"] = options.region
+        if options.access_key:
+            kwargs["aws_access_key_id"] = options.access_key
+        if options.secret_key:
+            kwargs["aws_secret_access_key"] = options.secret_key
+        kwargs["config"] = Config(signature_version="s3v4")
+        return kwargs
 
     def buildpath(self, filename: str, dest: str = ""):
         if not dest:
