@@ -1,4 +1,4 @@
-from typing import Sequence, Type
+from typing import ClassVar, Sequence, Type
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,12 +60,12 @@ AVAILABLE_ROUTERS = {"ant31box.server.api.info:router", "ant31box.server.api.deb
 
 
 class Server:
-    _available_middlewares: dict[str, str] = AVAILABLE_MIDDLEWARES
-    _default_middlewares: set[str] = DEFAULT_MIDDLEWARES
-    _default_routers: set[str] = AVAILABLE_ROUTERS
+    _available_middlewares: ClassVar[dict[str, str]] = AVAILABLE_MIDDLEWARES
+    _default_middlewares: ClassVar[set[str]] = DEFAULT_MIDDLEWARES
+    _default_routers: ClassVar[set[str]] = AVAILABLE_ROUTERS
 
-    _routers: set[str] = set()
-    _middlewares: set[str] = set()
+    _routers: ClassVar[set[str]] = set()
+    _middlewares: ClassVar[set[str]] = set()
 
     def __init__(self, conf: FastAPIConfigSchema, appname="ant31box", appenv="dev"):
         self.config: FastAPIConfigSchema = conf
