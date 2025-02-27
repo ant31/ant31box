@@ -112,20 +112,19 @@ class DownloadClient(BaseClient):
     def download_s3(self, source: str, dest_dir: str | Path = "", output: str | Path | IOBase = "") -> FileInfo:
         s3url = S3URL(url=source)
         fd = FileInfo(source=source, filename=s3url.filename, metadata=s3url.to_dict())
-        print(output)
+        if self.s3 is None:
+            raise AttributeError("S3 client is not set")
         if not output:
             output = Path(dest_dir).joinpath(s3url.filename)
         if output and hasattr(output, "write"):
             # write to file-like object
-            self.s3.download_file(s3url=s3url, dest=output)
+            self.s3.download_file(s3url=s3url.to_model(), dest=output)
             fd.content = output
-
         if output and isinstance(output, (Path, str)):
             # write to file on disk
             with open(str(output), "wb") as fileobj:
-                self.s3.download_file(s3url=s3url, dest=fileobj)
+                self.s3.download_file(s3url=s3url.to_model(), dest=fileobj)
             fd.path = output
-
         return fd
 
     async def download(self, source: str, dest_dir: str | Path = "", output: str | Path | IOBase = "") -> FileInfo:
