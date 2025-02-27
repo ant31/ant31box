@@ -12,9 +12,12 @@ class TokenAuthMiddleware:
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         headers = Headers(scope=scope)
-        if "token" not in headers or headers["token"] != self.token:
-            error = UnauthorizedAccess("NoAuth")
-            await JSONResponse({"error": error.to_dict()}, status_code=error.status_code)(scope, receive, send)
-            return
+
+        if self.token:
+            # If a token is set then check if the token is present in the headers and matches
+            if "token" not in headers or headers["token"] != self.token:
+                error = UnauthorizedAccess("NoAuth")
+                await JSONResponse({"error": error.to_dict()}, status_code=error.status_code)(scope, receive, send)
+                return
         await self.app(scope, receive, send)
         return
