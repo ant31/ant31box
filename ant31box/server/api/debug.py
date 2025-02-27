@@ -1,8 +1,9 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=too-few-public-methods
+import asyncio
 import logging
 import time
-import asyncio
+
 from fastapi import APIRouter
 
 from ant31box.server.exception import Forbidden

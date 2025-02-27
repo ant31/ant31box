@@ -1,3 +1,7 @@
+# pylint: disable=no-value-for-parameter
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
+
 import logging
 
 import click

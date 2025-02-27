@@ -70,6 +70,7 @@ class S3Client:
 
     def copy_s3_to_s3(
         self,
+        *,
         src_bucket: str,
         src_path: str,
         dest_bucket: str,
