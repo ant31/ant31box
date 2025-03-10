@@ -1,4 +1,7 @@
+import hashlib
+import hmac
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field
@@ -50,3 +53,28 @@ class S3URL:
     @property
     def filename(self) -> str:
         return Path(self.key).name
+
+
+class Job(BaseModel):
+    uuid: str = Field(...)
+    name: str = Field(...)
+    status: str | None = Field(default=None)
+    result: dict[str, Any] = Field(default={})
+
+
+class JobList(BaseModel):
+    jobs: list[Job] = Field([])
+
+
+class AsyncResponse(BaseModel):
+    payload: JobList = Field(default=JobList(jobs=[]))
+    signature: str | None = Field(default=None)
+    _secret_key: bytes = b"NhqPtmfle3R5aNIP1e3uzjonClVN65XAbvqqM6A7H5fATj0j"
+
+    def gen_signature(self):
+        self.signature = hmac.new(self._secret_key, self.payload.model_dump_json().encode(), hashlib.sha256).hexdigest()
+        return self.signature
+
+    def check_signature(self):
+        expect = hmac.new(self._secret_key, self.payload.model_dump_json().encode(), hashlib.sha256).hexdigest()
+        return expect != self.signature
