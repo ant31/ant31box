@@ -70,6 +70,23 @@ class CorsConfigSchema(BaseConfig):
     allow_headers: list[str] = Field(default=["*"])
 
 
+class TokenAuthMiddleWare(BaseConfig):
+    token: str = Field(default="")
+    parameter: str = Field(default="token_auth")
+    header_name: str = Field(default="token")
+    skip_paths: list[str] = Field(
+        default=[
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/docs",
+            "/openapi.json",
+            "/redoc",
+            "/metrics",
+            "/health",
+        ]
+    )
+
+
 class FastAPIConfigSchema(BaseConfig):
     server: str = Field(default="ant31box.server.server:serve")
     middlewares: list[str] = Field(default_factory=list)
@@ -81,6 +98,7 @@ class FastAPIConfigSchema(BaseConfig):
         default=None, description="Replace default routers, if set to None, default routers are added"
     )
     cors: CorsConfigSchema = Field(default_factory=CorsConfigSchema)
+    token_auth: TokenAuthMiddleWare = Field(default_factory=TokenAuthMiddleWare)
     token: str = Field(default="")
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8080)
