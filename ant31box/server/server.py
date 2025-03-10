@@ -31,7 +31,16 @@ def add_process_time_header_m(server: "Server"):
 
 
 def token_auth(server: "Server"):
-    server.app.add_middleware(TokenAuthMiddleware, token=server.config.token)
+    if server.config.token is not None:
+        server.config.token_auth.token = server.config.token
+
+    server.app.add_middleware(
+        TokenAuthMiddleware,
+        token=server.config.token_auth.token,
+        parameter=server.config.token_auth.parameter,
+        header_name=server.config.token_auth.header_name,
+        skip_paths=server.config.token_auth.skip_paths,
+    )
 
 
 def catch_exceptions(server: "Server"):

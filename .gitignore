@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 .env
+mise.*
 report.xml
 .python-version
 localconfig.yaml

@@ -1,11 +1,12 @@
 [project]
-authors = [{email="2t.antoine@gmail.com", name="ant31"}]
-[tool.poetry]
+
 name = "ant31box"
 version = "0.1.0"
 description = ""
-authors = ["ant31 <2t.antoine@gmail.com>"]
 readme = "README.md"
+dynamic = ["dependencies"]
+authors = [{email="2t.antoine@gmail.com", name="ant31"}]
+packages = [{ include = "ant31box" }]
 
 [tool.poetry.scripts]
 ant31box = 'ant31box.main:main'
@@ -57,6 +58,7 @@ pyright = "*"
 pytest-aioresponses = "*"
 types-cachetools = "*"
 moto = "*"
+ruff = "^0.9.10"
 
 [tool.poetry.extras]
 s3 = ["boto3"]
