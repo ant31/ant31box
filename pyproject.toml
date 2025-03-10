@@ -1,3 +1,5 @@
+[project]
+authors = [{email="2t.antoine@gmail.com", name="ant31"}]
 [tool.poetry]
 name = "ant31box"
 version = "0.1.0"
