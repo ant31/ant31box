@@ -1,7 +1,7 @@
 [project]
 
 name = "ant31box"
-version = "0.2.1"
+version = "0.2.2"
 description = ""
 readme = "README.md"
 dynamic = ["dependencies"]
@@ -14,9 +14,9 @@ ant31box = 'ant31box.main:main'
 [tool.poetry.dependencies]
 python = ">=3.11"
 
-asyncio = "^3"
+asyncio = "*"
 pydantic = "*"
-click = "*"
+click = {version = "*", optional = true}
 pyyaml = "*"
 
 paramiko = "*"
@@ -48,7 +48,7 @@ pylint = "*"
 pyre-check = "*"
 types-requests = "*"
 isort = "*"
-pytest = "<8"
+pytest = "*"
 coverage = "*"
 pytest-cov = "*"
 bumpversion = "*"
@@ -58,13 +58,13 @@ pyright = "*"
 pytest-aioresponses = "*"
 types-cachetools = "*"
 moto = "*"
-ruff = "^0.9.10"
+ruff = "*"
 
 [tool.poetry.extras]
 s3 = ["boto3"]
 fastapi = ["starlette-exporter", "fastapi"]
 sentry = ["sentry"]
-
+click = ["click"]
 [tool.black]
 line-length = 120
 target-version = ['py312']
