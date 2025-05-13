@@ -166,7 +166,7 @@ async def test_filedl_file_scheme():
 @pytest.mark.asyncio
 async def test_filedl_file_scheme_file_s3():
     client = filedl_client()
-    client.set_s3(S3ConfigSchema())
+    client.set_s3(S3ConfigSchema(secret_key="a", access_key="a"))
 
     dir = mkdtemp()
     with NamedTemporaryFile() as tmp:
@@ -192,7 +192,7 @@ async def test_filedl_file_scheme_file_s3():
 @pytest.mark.asyncio
 async def test_filedl_file_scheme_output_s3():
     client = filedl_client()
-    client.set_s3(S3ConfigSchema())
+    client.set_s3(S3ConfigSchema(secret_key="a", access_key="a"))
     with mock_aws():
         with NamedTemporaryFile() as tmp:
             tmp.write(b"test")

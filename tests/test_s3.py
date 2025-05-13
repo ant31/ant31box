@@ -39,12 +39,12 @@ def test_s3url_raise_scheme():
 
 
 def test_s3url_parse():
-    client = S3Client(S3ConfigSchema())
+    client = S3Client(S3ConfigSchema(secret_key="a", access_key="a"))
     assert client.s3url("test/key.pdf").url == "s3://abucket/test/key.pdf"
 
 
 async def test_s3_upload_from_file():
-    client = S3Client(S3ConfigSchema())
+    client = S3Client(S3ConfigSchema(secret_key="a", access_key="a"))
     with mock_aws():
         with NamedTemporaryFile() as tmp:
             tmp.write(b"test")
@@ -59,7 +59,7 @@ async def test_s3_upload_from_file():
 
 
 async def test_s3_upload_from_file_nodest():
-    client = S3Client(S3ConfigSchema(prefix="titi/"))
+    client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a"))
     with mock_aws():
         with NamedTemporaryFile() as tmp:
             tmp.write(b"test")
@@ -72,7 +72,7 @@ async def test_s3_upload_from_file_nodest():
 
 
 async def test_s3_download_to_file():
-    client = S3Client(S3ConfigSchema(prefix="titi/"))
+    client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a"))
     with mock_aws():
         with NamedTemporaryFile() as tmp:
             tmp.write(b"test")
@@ -92,7 +92,7 @@ async def test_s3_download_to_file():
 
 
 async def test_s3_copy_s3_s3():
-    client = S3Client(S3ConfigSchema(prefix="titi/"))
+    client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a"))
     with mock_aws():
         location = {"LocationConstraint": client.options.region}
         bucket2 = "bucketcopy"
