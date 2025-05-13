@@ -149,9 +149,9 @@ class ConfigSchema(BaseSettings):
 TConfigSchema = TypeVar("TConfigSchema", bound=ConfigSchema)  # pylint: disable= invalid-name
 
 
-class Config(Generic[TConfigSchema]):
+class GenericConfig(Generic[TConfigSchema]):
     _env_prefix = ENVPREFIX
-    __config_class__: Type[ConfigSchema] = ConfigSchema
+    __config_class__: Type[TConfigSchema]
 
     def __init__(self, conf: TConfigSchema):
         self.loaded = False
@@ -165,6 +165,64 @@ class Config(Generic[TConfigSchema]):
     def _set_conf(self, conf: TConfigSchema) -> None:
         self._conf = conf
         self.load(force=True)
+
+    def load(self, force=True) -> bool:
+        if not self.loaded or force:
+            self.loaded = True
+            return True
+        raise RuntimeError("Config already loaded")
+
+    @classmethod
+    def from_yaml(cls, file_path: str) -> Self:
+        with open(file_path, "r", encoding="utf-8") as file:
+            config_dict = yaml.safe_load(file)
+        # merge init + env config
+        alreadyinit = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
+        deepmerge(config_dict, alreadyinit)
+        logger.debug("Config loaded from %s: %s", file_path, config_dict)
+
+        return cls(cls.__config_class__.model_validate(config_dict))
+
+    @classmethod
+    def default_config(cls) -> Self:
+        return cls(cls.__config_class__())
+
+    @classmethod
+    def auto_config(cls, path: str | None = None) -> Self:
+        if path:
+            paths = [path]
+        else:
+            paths = [
+                os.environ.get(f"{cls._env_prefix}_CONFIG", "localconfig.yaml"),
+                "config.yaml",
+            ]
+        conf = cls.default_config()
+        matched = False
+        for p in paths:
+            if os.path.exists(p):
+                conf = cls.from_yaml(p)
+                conf.load()
+                logger.info("Config loaded: %s", p)
+                matched = True
+                break
+        if not matched:
+            logger.warning("No config file found, using default config")
+            conf.load()
+        return conf
+
+    def replace(self, other: TConfigSchema) -> None:
+        self._set_conf(other)
+
+    def dump(self, destpath: str = "") -> str:
+        dump = yaml.dump(self.conf.model_dump())
+        if destpath:
+            with open(destpath, "w", encoding="utf-8") as file:
+                file.write(dump)
+        return dump
+
+
+class Config(GenericConfig[ConfigSchema]):
+    __config_class__ = ConfigSchema
 
     @property
     def logging(self) -> LoggingConfigSchema:
@@ -231,54 +289,6 @@ class Config(Generic[TConfigSchema]):
             logging.getLogger(self.name).setLevel(log_level)
             logging.getLogger("ant31box").setLevel(log_level)
             logging.getLogger("root").setLevel(log_level)
-
-    @classmethod
-    def from_yaml(cls, file_path: str) -> Self:
-        with open(file_path, "r", encoding="utf-8") as file:
-            config_dict = yaml.safe_load(file)
-        # merge init + env config
-        alreadyinit = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
-        deepmerge(config_dict, alreadyinit)
-        logger.debug("Config loaded from %s: %s", file_path, config_dict)
-        return cls(cls.__config_class__.model_validate(config_dict))
-
-    @classmethod
-    def default_config(cls) -> Self:
-        return cls(cls.__config_class__())
-
-    @classmethod
-    def auto_config(cls, path: str | None = None) -> Self:
-        if path:
-            paths = [path]
-        else:
-            paths = [
-                os.environ.get(f"{cls._env_prefix}_CONFIG", "localconfig.yaml"),
-                "config.yaml",
-            ]
-        conf = cls.default_config()
-        matched = False
-        for p in paths:
-            if os.path.exists(p):
-                conf = cls.from_yaml(p)
-                conf.load()
-                logger.info("Config loaded: %s", p)
-                matched = True
-                break
-        if not matched:
-            logger.warning("No config file found, using default config")
-            conf.load()
-        return conf
-
-    def replace(self, other: TConfigSchema) -> None:
-        self._set_conf(other)
-
-    def dump(self, destpath: str = "") -> str:
-        dump = yaml.dump(self.conf.model_dump())
-        if destpath:
-            with open(destpath, "w", encoding="utf-8") as file:
-                file.write(dump)
-        return dump
-
 
 T = TypeVar("T", bound=Config)
 
