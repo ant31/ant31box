@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import importlib
-from typing import Mapping, Any
-
+from typing import Any, Mapping
 
 
 # from uvicorn.importer (BSD 3-Clause https://github.com/encode/uvicorn/blob/master/LICENSE.md)
 class ImportFromStringError(Exception):
     pass
+
 
 # From uvicorn.importer (BSD 3-Clause https://github.com/encode/uvicorn/blob/master/LICENSE.md)
 def import_from_string(import_str: Any) -> Any:
