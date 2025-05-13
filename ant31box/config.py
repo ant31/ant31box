@@ -290,7 +290,8 @@ class Config(GenericConfig[ConfigSchema]):
             logging.getLogger("ant31box").setLevel(log_level)
             logging.getLogger("root").setLevel(log_level)
 
-T = TypeVar("T", bound=Config)
+
+T = TypeVar("T", bound=GenericConfig)
 
 
 # Singleton to get the Configuration instance
