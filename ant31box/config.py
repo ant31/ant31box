@@ -146,7 +146,7 @@ class ConfigSchema(BaseSettings):
     name: str = Field(default="ant31box")
 
 
-TConfigSchema = TypeVar("TConfigSchema", bound=ConfigSchema)  # pylint: disable= invalid-name
+TConfigSchema = TypeVar("TConfigSchema", bound=BaseSettings)  # pylint: disable= invalid-name
 
 
 class GenericConfig(Generic[TConfigSchema]):
