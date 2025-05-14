@@ -1,18 +1,18 @@
 [project]
 
 name = "ant31box"
-version = "0.2.2"
+version = "0.2.3"
 description = ""
 readme = "README.md"
 dynamic = ["dependencies"]
 authors = [{email="2t.antoine@gmail.com", name="ant31"}]
 packages = [{ include = "ant31box" }]
-
+requires-python = ">=3.12,<4"
 [tool.poetry.scripts]
 ant31box = 'ant31box.main:main'
 
 [tool.poetry.dependencies]
-python = ">=3.11"
+
 
 asyncio = "*"
 pydantic = "*"
@@ -59,6 +59,7 @@ pytest-aioresponses = "*"
 types-cachetools = "*"
 moto = "*"
 ruff = "*"
+bump-my-version = "^1.1.2"
 
 [tool.poetry.extras]
 s3 = ["boto3"]
@@ -82,3 +83,26 @@ testpaths = "tests/"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.bumpversion]
+current_version = "0.2.3"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = true
+commit = false
+message = "Bump version: {current_version} → {new_version}"
+commit_args = ""
+
+[[tool.bumpversion.files]]
+filename = 'ant31box/__init__.py'
+search = "__version__ = \"{current_version}~ant31box\""
+replace = "__version__ = \"{new_version}~ant31box\""
+regex = true

@@ -107,3 +107,7 @@ run-server:
 
 ipython:
 	poetry run ipython
+
+BUMP ?= patch
+bump:
+	poetry run bump-my-version bump $(BUMP)
