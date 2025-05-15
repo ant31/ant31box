@@ -2,13 +2,9 @@
 import logging
 import sys
 from copy import copy
+from typing import Literal
 
 import click
-
-if sys.version_info < (3, 8):  # pragma: py-gte-38
-    from typing import Literal
-else:  # pragma: py-lt-38
-    from typing import Literal
 
 TRACE_LOG_LEVEL = 5
 

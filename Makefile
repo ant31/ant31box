@@ -70,7 +70,9 @@ format:
 format-test:
 	poetry run ruff format $(package) --check
 
-check: black-test isort-check poetry-check pylint pyre-check
+lint: check pylint pyre-check
+check: format-test isort-check poetry-check
+
 
 pyre: pyre-check
 

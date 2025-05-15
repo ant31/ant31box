@@ -59,7 +59,7 @@ class DownloadClient(BaseClient):
                 return FileInfo(content=output, filename=filename, source=source_path)
 
         # if output is a string, write the content to that file and return
-        elif output and isinstance(output, (Path, str)):
+        elif output and isinstance(output, Path | str):
             dest_path = output
         else:
             dest_path = Path(dest_dir).joinpath(filename)
@@ -99,7 +99,7 @@ class DownloadClient(BaseClient):
             output.write(content)
             fd = FileInfo(content=output, filename=filename, source=url)
             return fd
-        if output and isinstance(output, (Path, str)):
+        if output and isinstance(output, Path | str):
             dest_path = output
         else:
             dest_path = Path(dest_dir).joinpath(filename)
@@ -119,7 +119,7 @@ class DownloadClient(BaseClient):
             # write to file-like object
             self.s3.download_file(s3url=s3url.to_model(), dest=output)
             fd.content = output
-        if output and isinstance(output, (Path, str)):
+        if output and isinstance(output, Path | str):
             # write to file on disk
             with open(str(output), "wb") as fileobj:
                 self.s3.download_file(s3url=s3url.to_model(), dest=fileobj)

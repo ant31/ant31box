@@ -62,7 +62,7 @@ class S3Client:
 
     def download_file(self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO) -> str | IOBase | BinaryIO:
         logger.info("download uri='%s', dest='%s'", s3url.url, dest)
-        if isinstance(dest, (str, Path)):
+        if isinstance(dest, str | Path):
             self.client.Bucket(s3url.bucket).download_file(s3url.key, str(dest))
         else:
             self.client.Bucket(s3url.bucket).download_fileobj(s3url.key, dest)

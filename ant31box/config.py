@@ -224,8 +224,8 @@ class GenericConfig(Generic[TBaseConfig]):
 TConfigSchema = TypeVar("TConfigSchema", bound=ConfigSchema)  # pylint: disable= invalid-name
 
 
-class Config[TConfigSchema](GenericConfig[TConfigSchema]):
-    __config_class__ = TConfigSchema
+class Config(Generic[TConfigSchema], GenericConfig[TConfigSchema]):
+    __config_class__: type[TConfigSchema]
 
     @property
     def logging(self) -> LoggingConfigSchema:
