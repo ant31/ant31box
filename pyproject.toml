@@ -1,41 +1,39 @@
 [project]
 
 name = "ant31box"
-version = "0.2.4"
+version = "0.2.5"
 description = ""
 readme = "README.md"
 dynamic = ["dependencies"]
 authors = [{email="2t.antoine@gmail.com", name="ant31"}]
 packages = [{ include = "ant31box" }]
 requires-python = ">=3.12,<4"
+
+dependencies = [
+             "asyncio",
+             "pydantic",
+             "pyyaml",
+             "paramiko",
+             "aiohttp[seepdups]",
+             "aiohttp_requests",
+             "typing-extensions",
+             "aiohttp-prometheus-exporter",
+             "pydantic-settings",
+             "aiofiles",
+             "aioshutil",
+             "python-multipart",
+             "cachetools"
+]
+
+[project.optional-dependencies]
+fastapi = ["starlette-exporter", "fastapi[all]"]
+sentry = ["sentry-sdk"]
+s3 = ["boto3"]
+cli = ["click<8.20", "rich", "typer"]
+
 [tool.poetry.scripts]
 ant31box = 'ant31box.main:main'
 
-[tool.poetry.dependencies]
-
-
-asyncio = "*"
-pydantic = "*"
-click = {version = "*", optional = true}
-pyyaml = "*"
-
-paramiko = "*"
-sentry-sdk = {extras = ["fastapi"], version = "*", optional = true}
-# temporalloop = {path = "../temporalrunner", develop = true}
-aiohttp = {extras = ["speedups"], version = "*"}
-aiohttp_requests = "*"
-fastapi = {version = "*", extras = ["all"], optional = true}
-typing-extensions = "*"
-
-aiohttp-prometheus-exporter = "*"
-starlette-exporter = {version="*", optional = true}
-pydantic-settings = "*"
-
-aiofiles = "*"
-aioshutil = "*"
-python-multipart = "*"
-cachetools = "*"
-boto3 = {version = "*", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 aioresponses = "*"
@@ -61,11 +59,6 @@ moto = "*"
 ruff = "*"
 bump-my-version = "^1.1.2"
 
-[tool.poetry.extras]
-s3 = ["boto3"]
-fastapi = ["starlette-exporter", "fastapi"]
-sentry = ["sentry-sdk"]
-click = ["click"]
 [tool.black]
 line-length = 120
 target-version = ['py312']
@@ -85,7 +78,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.bumpversion]
-current_version = "0.2.4"
+current_version = "0.2.5"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
