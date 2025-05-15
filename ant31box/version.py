@@ -10,7 +10,7 @@ from ant31box import __version__
 @cache
 def get_git_sha():
     if os.path.exists("GIT_HEAD"):
-        with open("GIT_HEAD", "r", encoding="utf-8") as openf:
+        with open("GIT_HEAD", encoding="utf-8") as openf:
             return openf.read()
     else:
         try:

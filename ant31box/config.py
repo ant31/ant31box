@@ -4,7 +4,7 @@ import json
 import logging
 import logging.config
 import os
-from typing import Any, Generic, Self, Type, TypeVar
+from typing import Any, Generic, Self, TypeVar
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -146,23 +146,23 @@ class ConfigSchema(BaseSettings):
     name: str = Field(default="ant31box")
 
 
-TConfigSchema = TypeVar("TConfigSchema", bound=BaseSettings)  # pylint: disable= invalid-name
+TBaseConfig = TypeVar("TBaseConfig", bound=BaseSettings)  # pylint: disable= invalid-name
 
 
-class GenericConfig(Generic[TConfigSchema]):
+class GenericConfig(Generic[TBaseConfig]):
     _env_prefix = ENVPREFIX
-    __config_class__: Type[TConfigSchema]
+    __config_class__: type[TBaseConfig]
 
-    def __init__(self, conf: TConfigSchema):
+    def __init__(self, conf: TBaseConfig):
         self.loaded = False
-        self._conf: TConfigSchema = conf
+        self._conf: TBaseConfig = conf
         self._set_conf(conf)
 
     @property
-    def conf(self) -> TConfigSchema:
+    def conf(self) -> TBaseConfig:
         return self._conf
 
-    def _set_conf(self, conf: TConfigSchema) -> None:
+    def _set_conf(self, conf: TBaseConfig) -> None:
         self._conf = conf
         self.load(force=True)
 
@@ -174,7 +174,7 @@ class GenericConfig(Generic[TConfigSchema]):
 
     @classmethod
     def from_yaml(cls, file_path: str) -> Self:
-        with open(file_path, "r", encoding="utf-8") as file:
+        with open(file_path, encoding="utf-8") as file:
             config_dict = yaml.safe_load(file)
         # merge init + env config
         alreadyinit = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
@@ -210,7 +210,7 @@ class GenericConfig(Generic[TConfigSchema]):
             conf.load()
         return conf
 
-    def replace(self, other: TConfigSchema) -> None:
+    def replace(self, other: TBaseConfig) -> None:
         self._set_conf(other)
 
     def dump(self, destpath: str = "") -> str:
@@ -221,8 +221,11 @@ class GenericConfig(Generic[TConfigSchema]):
         return dump
 
 
-class Config(GenericConfig[ConfigSchema]):
-    __config_class__ = ConfigSchema
+TConfigSchema = TypeVar("TConfigSchema", bound=ConfigSchema)  # pylint: disable= invalid-name
+
+
+class Config[TConfigSchema](GenericConfig[TConfigSchema]):
+    __config_class__ = TConfigSchema
 
     @property
     def logging(self) -> LoggingConfigSchema:
@@ -277,7 +280,7 @@ class Config(GenericConfig[ConfigSchema]):
             if loaded_config is not None:
                 if (
                     "loggers" in loaded_config
-                    and not self.name in loaded_config["loggers"]
+                    and self.name not in loaded_config["loggers"]
                     and "ant31box" in loaded_config["loggers"]
                 ):
                     loaded_config["loggers"][self.name] = loaded_config["loggers"]["ant31box"]
@@ -298,7 +301,7 @@ T = TypeVar("T", bound=GenericConfig)
 # pylint: disable=super-init-not-called
 class GConfig(Generic[T]):
     __instance__: T | None = None
-    __conf_class__: Type[T] | None = None
+    __conf_class__: type[T] | None = None
 
     def __init__(self, path: str | None = None):
         self.path = path
@@ -315,7 +318,7 @@ class GConfig(Generic[T]):
         cls.__instance__ = None
 
     @classmethod
-    def set_conf_class(cls, conf_class: Type[T]) -> None:
+    def set_conf_class(cls, conf_class: type[T]) -> None:
         cls.__conf_class__ = conf_class
 
     @classmethod
@@ -325,7 +328,7 @@ class GConfig(Generic[T]):
         return cls.__instance__
 
 
-def config(path: str | None = None, confclass: Type[T] = Config, reload: bool = False) -> T:
+def config(path: str | None = None, confclass: type[T] = Config, reload: bool = False) -> T:
     if confclass is not None:
         GConfig[confclass].set_conf_class(confclass)
     if reload:

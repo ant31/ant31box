@@ -61,7 +61,14 @@ pylint-quick:
 pylint:
 	poetry run pylint --rcfile=".pylintrc" $(package)
 
-fix: black isort
+fix: format isort
+	poetry run ruff check --fix
+
+format:
+	poetry run ruff format $(package)
+
+format-test:
+	poetry run ruff format $(package) --check
 
 check: black-test isort-check poetry-check pylint pyre-check
 
@@ -85,8 +92,10 @@ publish: clean
 
 isort:
 	poetry run isort .
+	poetry run ruff check --select I $(package) tests --fix
 
 isort-check:
+	poetry run ruff check --select I $(package) tests
 	poetry run isort --diff --check .
 
 .ONESHELL:

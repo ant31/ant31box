@@ -1,4 +1,4 @@
-from typing import ClassVar, Sequence, Type
+from typing import ClassVar
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -123,7 +123,7 @@ class Server:
             self.app.include_router(import_from_string(router))
 
 
-def serve_from_config(conf: Config, server_class: Type[Server] = Server) -> FastAPI:
+def serve_from_config(conf: Config, server_class: type[Server] = Server) -> FastAPI:
     init(conf.conf, "fastapi")
     if not issubclass(server_class, Server):
         raise TypeError(f"server must be a subclass or instance of {Server}")

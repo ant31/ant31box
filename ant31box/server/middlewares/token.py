@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from starlette.datastructures import URL, Headers, QueryParams
 from starlette.responses import JSONResponse

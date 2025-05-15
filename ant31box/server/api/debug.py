@@ -2,7 +2,6 @@
 # pylint: disable=too-few-public-methods
 import asyncio
 import logging
-import time
 
 from fastapi import APIRouter
 

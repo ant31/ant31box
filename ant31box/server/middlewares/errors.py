@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi import Request, Response
 from starlette.responses import JSONResponse

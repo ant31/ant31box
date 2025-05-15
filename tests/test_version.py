@@ -1,4 +1,3 @@
-import platform
 
 from ant31box.version import VERSION, Version
 

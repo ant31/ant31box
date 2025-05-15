@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import HTTPException
 
@@ -8,7 +8,7 @@ class APIException(HTTPException):
     errorcode: str = "internal-error"
     payload: dict[str, Any]
 
-    def __init__(self, message: str, payload: Optional[dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, payload: dict[str, Any] | None = None) -> None:
         if not payload:
             payload = {}
         self.payload: dict[str, Any] = dict(payload)

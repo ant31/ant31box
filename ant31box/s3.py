@@ -1,7 +1,7 @@
 import logging
 from io import IOBase
 from pathlib import Path
-from typing import BinaryIO, Tuple
+from typing import BinaryIO
 
 import boto3
 from botocore.client import Config
@@ -76,7 +76,7 @@ class S3Client:
         dest_bucket: str,
         dest_prefix: str = "",
         name_only: bool = False,
-    ) -> Tuple[S3Dest, S3Dest]:
+    ) -> tuple[S3Dest, S3Dest]:
         copy_source = {
             "Bucket": src_bucket,
             "Key": src_path,

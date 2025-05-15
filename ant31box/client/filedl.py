@@ -49,7 +49,6 @@ class DownloadClient(BaseClient):
     async def copy_local_file(
         self, source_path: str, dest_dir: str | Path = "", output: str | Path | IOBase = ""
     ) -> FileInfo:
-
         filename = Path(source_path).name
         # Write output
         # if output is a IOBase, write the content to it and return it

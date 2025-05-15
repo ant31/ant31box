@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import importlib
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 
 # from uvicorn.importer (BSD 3-Clause https://github.com/encode/uvicorn/blob/master/LICENSE.md)

@@ -17,7 +17,7 @@ def init_sentry(config: SentryConfigSchema, integration_app: str = ""):
                 StarletteIntegration(),
                 FastApiIntegration(),
             ]
-        sentry_sdk.init(  # pylint: disable=abstract-class-instantiated # noqa: E0110
+        sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
             dsn=config.dsn,
             integrations=integrations,
             traces_sample_rate=config.traces_sample_rate,
