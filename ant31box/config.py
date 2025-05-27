@@ -162,7 +162,6 @@ class GenericConfig(Generic[TBaseConfig]):
     def conf(self) -> TBaseConfig:
         return self._conf
 
-
     @property
     def logging(self) -> LoggingConfigSchema:
         return LoggingConfigSchema()
@@ -295,7 +294,6 @@ class Config(Generic[TConfigSchema], GenericConfig[TConfigSchema]):
     @property
     def name(self) -> str:
         return self.conf.name
-
 
 
 T = TypeVar("T", bound=GenericConfig)
