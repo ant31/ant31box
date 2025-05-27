@@ -162,15 +162,64 @@ class GenericConfig(Generic[TBaseConfig]):
     def conf(self) -> TBaseConfig:
         return self._conf
 
+
+    @property
+    def logging(self) -> LoggingConfigSchema:
+        return LoggingConfigSchema()
+
+    @property
+    def name(self) -> str:
+        return "app"
+
     def _set_conf(self, conf: TBaseConfig) -> None:
         self._conf = conf
         self.load(force=True)
 
     def load(self, force=True) -> bool:
         if not self.loaded or force:
+            self.configure_logging()
             self.loaded = True
             return True
         raise RuntimeError("Config already loaded")
+
+    def configure_logging(self) -> None:
+        log_config = self.logging.log_config
+        use_colors = self.logging.use_colors
+        log_level = self.logging.level
+
+        if log_config:
+            loaded_config = None
+            if isinstance(log_config, dict):
+                if use_colors in (True, False):
+                    log_config["formatters"]["default"]["use_colors"] = use_colors
+                loaded_config = log_config
+
+            elif log_config.endswith(".json"):
+                with open(log_config, encoding="utf-8") as file:
+                    loaded_config = json.load(file)
+
+            elif log_config.endswith((".yaml", ".yml")):
+                with open(log_config, encoding="utf-8") as file:
+                    loaded_config = yaml.safe_load(file)
+            else:
+                # See the note about fileConfig() here:
+                # https://docs.python.org/3/library/logging.config.html#configuration-file-format
+                logging.config.fileConfig(log_config, disable_existing_loggers=False)
+            if loaded_config is not None:
+                if (
+                    "loggers" in loaded_config
+                    and self.name not in loaded_config["loggers"]
+                    and "ant31box" in loaded_config["loggers"]
+                ):
+                    loaded_config["loggers"][self.name] = loaded_config["loggers"]["ant31box"]
+                logging.config.dictConfig(loaded_config)
+
+        if log_level is not None:
+            if isinstance(log_level, str):
+                log_level = LOG_LEVELS[log_level.lower()]
+            logging.getLogger(self.name).setLevel(log_level)
+            logging.getLogger("ant31box").setLevel(log_level)
+            logging.getLogger("root").setLevel(log_level)
 
     @classmethod
     def from_yaml(cls, file_path: str) -> Self:
@@ -247,51 +296,6 @@ class Config(Generic[TConfigSchema], GenericConfig[TConfigSchema]):
     def name(self) -> str:
         return self.conf.name
 
-    def load(self, force=True) -> bool:
-        if not self.loaded or force:
-            self.configure_logging()
-            self.loaded = True
-            return True
-        raise RuntimeError("Config already loaded")
-
-    def configure_logging(self) -> None:
-        log_config = self.logging.log_config
-        use_colors = self.logging.use_colors
-        log_level = self.logging.level
-
-        if log_config:
-            loaded_config = None
-            if isinstance(log_config, dict):
-                if use_colors in (True, False):
-                    log_config["formatters"]["default"]["use_colors"] = use_colors
-                loaded_config = log_config
-
-            elif log_config.endswith(".json"):
-                with open(log_config, encoding="utf-8") as file:
-                    loaded_config = json.load(file)
-
-            elif log_config.endswith((".yaml", ".yml")):
-                with open(log_config, encoding="utf-8") as file:
-                    loaded_config = yaml.safe_load(file)
-            else:
-                # See the note about fileConfig() here:
-                # https://docs.python.org/3/library/logging.config.html#configuration-file-format
-                logging.config.fileConfig(log_config, disable_existing_loggers=False)
-            if loaded_config is not None:
-                if (
-                    "loggers" in loaded_config
-                    and self.name not in loaded_config["loggers"]
-                    and "ant31box" in loaded_config["loggers"]
-                ):
-                    loaded_config["loggers"][self.name] = loaded_config["loggers"]["ant31box"]
-                logging.config.dictConfig(loaded_config)
-
-        if log_level is not None:
-            if isinstance(log_level, str):
-                log_level = LOG_LEVELS[log_level.lower()]
-            logging.getLogger(self.name).setLevel(log_level)
-            logging.getLogger("ant31box").setLevel(log_level)
-            logging.getLogger("root").setLevel(log_level)
 
 
 T = TypeVar("T", bound=GenericConfig)
