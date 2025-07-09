@@ -1,7 +1,7 @@
 [project]
 
 name = "ant31box"
-version = "0.2.7"
+version = "0.2.8"
 description = ""
 readme = "README.md"
 dynamic = ["dependencies"]
@@ -79,7 +79,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.bumpversion]
-current_version = "0.2.7"
+current_version = "0.2.8"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
