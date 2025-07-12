@@ -34,12 +34,12 @@ LOGGING_CONFIG: dict[str, Any] = {
         "default": {
             "formatter": "default",
             "class": "logging.StreamHandler",
-            "stream": "ext://sys.stdout",
+            "stream": "ext://sys.stderr",
             "level": "INFO",
         },
     },
     "loggers": {
-        "ant31box": {"handlers": ["default"], "level": "INFO", "propagate": True},
+        "ant31box": {"handlers": ["default"], "level": "INFO", "propagate": False},
     },
 }
 
