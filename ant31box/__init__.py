@@ -1,2 +1,2 @@
 #!/usr/bin/env python3
-__version__ = "0.2.8~ant31box"
+__version__ = "0.3.0~ant31box"
