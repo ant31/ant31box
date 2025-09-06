@@ -3,14 +3,13 @@ import os
 import pytest
 
 from ant31box.config import config
+from ant31box.server.server import serve
 
 LOCAL_DIR = os.path.dirname(__file__)
 
 
 @pytest.fixture
 def app():
-    from ant31box.server.server import serve
-
     app = serve()
     return app
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import contextlib
 import json
 import logging
 from typing import Any, Literal, TypeVar
@@ -91,7 +92,7 @@ class BaseClient:
             raw = await resp.read()
         except aiohttp.ClientPayloadError:
             raw = b""
-        try:
+        with contextlib.suppress(Exception):
             logger.debug(
                 json.dumps(
                     {
@@ -109,8 +110,6 @@ class BaseClient:
                     default=str,
                 )
             )
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
 
     def _url(self, path: str, endpoint: str = "") -> str:
         """Construct the url from a relative path"""
