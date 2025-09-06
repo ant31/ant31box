@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import logging
 import sys
+from collections.abc import Callable
 from copy import copy
-from typing import Literal
+from typing import ClassVar, Literal
 
 import click
 
@@ -18,7 +19,7 @@ class ColourizedFormatter(logging.Formatter):
       for formatting the output, instead of the plain text message.
     """
 
-    level_name_colors = {
+    level_name_colors: ClassVar[dict[int, Callable[[str], str]]] = {
         TRACE_LOG_LEVEL: lambda level_name: click.style(str(level_name), fg="blue"),
         logging.DEBUG: lambda level_name: click.style(str(level_name), fg="cyan"),
         logging.INFO: lambda level_name: click.style(str(level_name), fg="green"),

@@ -4,7 +4,7 @@ import json
 import logging
 import logging.config
 import os
-from typing import Any, Generic, Self, TypeVar
+from typing import Any, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -146,10 +146,7 @@ class ConfigSchema(BaseSettings):
     name: str = Field(default="ant31box")
 
 
-TBaseConfig = TypeVar("TBaseConfig", bound=BaseSettings)  # pylint: disable= invalid-name
-
-
-class GenericConfig(Generic[TBaseConfig]):
+class GenericConfig[TBaseConfig: BaseSettings]:
     _env_prefix = ENVPREFIX
     __config_class__: type[TBaseConfig]
 
@@ -269,10 +266,7 @@ class GenericConfig(Generic[TBaseConfig]):
         return dump
 
 
-TConfigSchema = TypeVar("TConfigSchema", bound=ConfigSchema)  # pylint: disable= invalid-name
-
-
-class Config(Generic[TConfigSchema], GenericConfig[TConfigSchema]):
+class Config[TConfigSchema: ConfigSchema](GenericConfig[TConfigSchema]):
     __config_class__: type[TConfigSchema]
 
     @property
@@ -296,12 +290,13 @@ class Config(Generic[TConfigSchema], GenericConfig[TConfigSchema]):
         return self.conf.name
 
 
-T = TypeVar("T", bound=GenericConfig)
+class DefaultConfig(Config[ConfigSchema]):
+    __config_class__ = ConfigSchema
 
 
 # Singleton to get the Configuration instance
 # pylint: disable=super-init-not-called
-class GConfig(Generic[T]):
+class GConfig[T: GenericConfig]:
     __instance__: T | None = None
     __conf_class__: type[T] | None = None
 
@@ -330,7 +325,7 @@ class GConfig(Generic[T]):
         return cls.__instance__
 
 
-def config(path: str | None = None, confclass: type[T] = Config, reload: bool = False) -> T:
+def config[T: GenericConfig](path: str | None = None, confclass: type[T] = DefaultConfig, reload: bool = False) -> T:
     if confclass is not None:
         GConfig[confclass].set_conf_class(confclass)
     if reload:

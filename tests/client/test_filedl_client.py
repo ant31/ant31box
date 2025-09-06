@@ -102,9 +102,8 @@ async def test_filedl_404(aioresponses):
         body=b"",
     )
     client = filedl_client()
-    with TemporaryFile() as tmp:
-        with pytest.raises(aiohttp.ClientResponseError) as excinfo:
-            await client.download(source=path, output=tmp)
+    with TemporaryFile() as tmp, pytest.raises(aiohttp.ClientResponseError) as excinfo:
+        await client.download(source=path, output=tmp)
     assert excinfo.value.status == 404
 
 

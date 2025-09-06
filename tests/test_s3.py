@@ -45,30 +45,28 @@ def test_s3url_parse():
 
 async def test_s3_upload_from_file():
     client = S3Client(S3ConfigSchema(secret_key="a", access_key="a"))
-    with mock_aws():
-        with NamedTemporaryFile() as tmp:
-            tmp.write(b"test")
-            tmp.seek(0)
-            dest = "toto/test.pdf"
+    with mock_aws(), NamedTemporaryFile() as tmp:
+        tmp.write(b"test")
+        tmp.seek(0)
+        dest = "toto/test.pdf"
 
-            location = {"LocationConstraint": client.options.region}
-            client.client.create_bucket(Bucket=client.bucket, CreateBucketConfiguration=location)
-            # from filepath
-            a = client.upload_file(filepath=tmp.name, dest=dest)
-            assert a.url == f"s3://{client.bucket}/{dest}"
+        location = {"LocationConstraint": client.options.region}
+        client.client.create_bucket(Bucket=client.bucket, CreateBucketConfiguration=location)
+        # from filepath
+        a = client.upload_file(filepath=tmp.name, dest=dest)
+        assert a.url == f"s3://{client.bucket}/{dest}"
 
 
 async def test_s3_upload_from_file_nodest():
     client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a"))
-    with mock_aws():
-        with NamedTemporaryFile() as tmp:
-            tmp.write(b"test")
-            tmp.seek(0)
-            location = {"LocationConstraint": client.options.region}
-            client.client.create_bucket(Bucket=client.bucket, CreateBucketConfiguration=location)
-            # from filepath
-            a = client.upload_file(filepath=tmp.name)
-            assert a.url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
+    with mock_aws(), NamedTemporaryFile() as tmp:
+        tmp.write(b"test")
+        tmp.seek(0)
+        location = {"LocationConstraint": client.options.region}
+        client.client.create_bucket(Bucket=client.bucket, CreateBucketConfiguration=location)
+        # from filepath
+        a = client.upload_file(filepath=tmp.name)
+        assert a.url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
 
 
 async def test_s3_download_to_file():

@@ -1,64 +1,91 @@
 [project]
-
 name = "ant31box"
 version = "0.2.8"
 description = ""
-readme = "README.md"
-dynamic = ["dependencies"]
-authors = [{email="2t.antoine@gmail.com", name="ant31"}]
-packages = [{ include = "ant31box" }]
+authors = [{ name = "ant31", email = "2t.antoine@gmail.com" }]
 requires-python = ">=3.12,<4"
-
+readme = "README.md"
 dependencies = [
-             "asyncio",
-             "pydantic",
-             "pyyaml",
-             "paramiko",
-             "aiohttp[speedups]",
-             "aiohttp_requests",
-             "typing-extensions",
-             "aiohttp-prometheus-exporter",
-             "pydantic-settings",
-             "aiofiles",
-             "aioshutil",
-             "python-multipart",
-             "cachetools"
+    "asyncio",
+    "pydantic",
+    "pyyaml",
+    "paramiko",
+    "aiohttp[speedups]",
+    "aiohttp_requests",
+    "typing-extensions",
+    "aiohttp-prometheus-exporter",
+    "pydantic-settings",
+    "aiofiles",
+    "aioshutil",
+    "python-multipart",
+    "cachetools",
 ]
 
+packages = [{ include = "ant31box" }]
+
 [project.optional-dependencies]
-fastapi = ["starlette-exporter", "fastapi[all]"]
+fastapi = [
+    "starlette-exporter",
+    "fastapi[all]",
+]
 sentry = ["sentry-sdk"]
 s3 = ["boto3"]
-cli = ["click<8.20", "rich", "typer"]
-all = ["click<8.20", "rich", "typer", "boto3", "sentry-sdk", "starlette-exporter", "fastapi[all]"]
+cli = [
+    "click<8.20",
+    "rich",
+    "typer",
+]
+all = [
+    "click<8.20",
+    "rich",
+    "typer",
+    "boto3",
+    "sentry-sdk",
+    "starlette-exporter",
+    "fastapi[all]",
+]
 
-[tool.poetry.scripts]
-ant31box = 'ant31box.main:main'
+[project.scripts]
+ant31box = "ant31box.main:main"
+
+[dependency-groups]
+dev = [
+    "click<8.20",
+    "rich",
+    "typer",
+    "boto3",
+    "sentry-sdk",
+    "starlette-exporter",
+    "fastapi[all]",
 
 
-[tool.poetry.group.dev.dependencies]
-aioresponses = "*"
-pyreadline = "*"
-pylint-pydantic = "*"
-requests = "*"
-black = "*"
-ipython = "*"
-pylint = "*"
-pyre-check = "*"
-types-requests = "*"
-isort = "*"
-pytest = "*"
-coverage = "*"
-pytest-cov = "*"
-bumpversion = "*"
-pytest-ordering = "*"
-pytest-asyncio = "*"
-pyright = "*"
-pytest-aioresponses = "*"
-types-cachetools = "*"
-moto = "*"
-ruff = "*"
-bump-my-version = "^1.1.2"
+    "aioresponses",
+    "pyreadline",
+    "pylint-pydantic",
+    "requests",
+    "black",
+    "ipython",
+    "pylint",
+    "pyre-check",
+    "types-requests",
+    "isort",
+    "pytest",
+    "coverage",
+    "pytest-cov",
+    "bumpversion",
+    "pytest-ordering",
+    "pytest-asyncio",
+    "pyright",
+    "pytest-aioresponses",
+    "types-cachetools",
+    "moto",
+    "ruff",
+    "bump-my-version>=1.1.2,<2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 120
@@ -73,10 +100,6 @@ skip_gitignore = true
 
 [tool.pytest]
 testpaths = "tests/"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.bumpversion]
 current_version = "0.2.8"
@@ -100,3 +123,7 @@ filename = 'ant31box/__init__.py'
 search = "__version__ = \"{current_version}~ant31box\""
 replace = "__version__ = \"{new_version}~ant31box\""
 regex = true
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
