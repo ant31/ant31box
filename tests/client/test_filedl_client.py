@@ -6,7 +6,6 @@ import aiohttp
 import pytest
 from moto import mock_aws
 
-from ant31box.client.filedl import FileInfo
 from ant31box.client.filedl import DownloadClient, FileInfo
 from ant31box.config import S3ConfigSchema
 
