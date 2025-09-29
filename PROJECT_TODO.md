@@ -25,16 +25,15 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
 
 **Goal:** Improve code consistency and maintainability by removing duplication, standardizing frameworks, and simplifying the project structure.
 
--   [ ] **Standardize on a Single CLI Framework:**
-    -   [ ] Choose `typer` as the official CLI framework for the project.
-    -   [ ] Port any missing functionality from the old `click` commands (`ant31box/cmd/*`) to their `typer` equivalents (`ant31box/cmd/typer/*`).
-    -   [ ] Delete the `ant31box/cmd` directory and its contents.
-    -   [ ] Update the `[project.scripts]` entry point in `pyproject.toml` to point to the main `typer` application.
-    -   [ ] Ensure all CLI-related documentation and examples use `typer`.
+-   [x] **Standardize on a Single CLI Framework:**
+    -   [x] Chose `typer` as the official CLI framework for the project.
+    -   [x] Update the `[project.scripts]` entry point in `pyproject.toml` to point to the main `typer` application.
+    -   [x] Ensure all CLI-related documentation and examples use `typer`.
+    -   [ ] *Future Task*: Delete the `ant31box/cmd` directory and its contents in a future major version release after a deprecation period.
 
--   [ ] **Eliminate Code Duplication:**
-    -   [ ] Delete `ant31box/utilsd.py`.
-    -   [ ] Refactor all usages of its `import_from_string` to use the canonical version in `ant31box/importer.py`.
+-   [x] **Eliminate Code Duplication:**
+    -   [x] Delete `ant31box/utilsd.py`.
+    -   [x] Refactor all usages of its `import_from_string` and `deepmerge` to use the canonical versions in `ant31box/importer.py` and `ant31box/config.py`.
 
 ---
 

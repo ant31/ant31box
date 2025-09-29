@@ -48,7 +48,7 @@ all = [
 ]
 
 [project.scripts]
-ant31box = "ant31box.main:main"
+ant31box = "ant31box.cmd.typer.main:main"
 
 [dependency-groups]
 dev = [
@@ -59,8 +59,6 @@ dev = [
     "sentry-sdk",
     "starlette-exporter",
     "fastapi[all]",
-
-
     "aioresponses",
     "pyreadline",
     "pylint-pydantic",

@@ -10,7 +10,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from ant31box.utilsd import deepmerge
+from ant31box.importer import deepmerge
 
 LOG_LEVELS: dict[str, int] = {
     "critical": logging.CRITICAL,

@@ -6,7 +6,7 @@
 *   **FastAPI Server:** A pre-configured FastAPI server setup with common middlewares (CORS, Prometheus, error handling, token auth) and extensible routing.
 *   **S3 Client:** Utilities for interacting with S3-compatible storage.
 *   **Async HTTP Client:** Base client built on `aiohttp` and a specialized client for downloading files from various sources (HTTP, S3, local).
-*   **Command-Line Interface:** Built with `click` for common tasks like running the server, showing version info, and dumping default configuration.
+*   **Command-Line Interface:** Built with `typer` for common tasks like running the server, showing version info, and dumping default configuration.
 *   **Logging:** Configurable logging setup with colorized output.
 
 ## Installation
@@ -31,7 +31,7 @@ The package provides a CLI tool, typically accessed via `ant31box` (as defined i
 ant31box server --config config.yaml --port 8000
 ```
 
-*   Use `--config` or the `ANT31BOX_CONFIG` environment variable to specify a configuration file.
+*   Use `--config` or the `FASTAPI_CONFIG` environment variable to specify a configuration file.
 *   See `ant31box server --help` for more options.
 
 **Show Version Information:**
@@ -167,7 +167,7 @@ Key configuration sections (defined in `ConfigSchema`):
 *   **Extensible Server:** Easily add custom FastAPI routers and middlewares. See `ant31box.server.server.Server` class variables (`_default_middlewares`, `_available_middlewares`, etc.).
 *   **File Handling:** Unified interface (`DownloadClient`) for downloading files from HTTP(S), S3, and local paths.
 *   **S3 Utilities:** Direct S3 operations (upload, download, copy). Requires `boto3` (`pip install ant31box[s3]`).
-*   **Standardized CLI:** Common commands for server management and inspection using `click`.
+*   **Standardized CLI:** Common commands for server management and inspection using `typer`.
 
 ## Development
 
