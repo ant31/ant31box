@@ -19,6 +19,7 @@ dependencies = [
     "aioshutil",
     "python-multipart",
     "cachetools",
+    "aioboto3>=15.1.0",
 ]
 
 packages = [{ include = "ant31box" }]
@@ -80,6 +81,7 @@ dev = [
     "pytest-aioresponses",
     "types-cachetools",
     "moto",
+    "pytest-aioboto3",
     "ruff",
     "bump-my-version>=1.1.2,<2",
 ]
