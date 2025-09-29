@@ -111,9 +111,7 @@ class S3Client:
         )
         return await self.download_file_async(s3url, dest)
 
-    async def download_file_async(
-        self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO
-    ) -> str | IOBase | BinaryIO:
+    async def download_file_async(self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO) -> str | IOBase | BinaryIO:
         logger.info("download uri='%s', dest='%s'", s3url.url, dest)
         async with self.session.resource("s3", **self._boto_client_args(self.options)) as s3:
             bucket = await s3.Bucket(s3url.bucket)
