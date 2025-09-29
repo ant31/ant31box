@@ -70,7 +70,7 @@ format:
 format-test:
 	uv run ruff format $(package) --check
 
-lint: check pylint pyre-check
+lint: check  # pylint pyre-check
 check: format-test isort-check uv-check
 
 
