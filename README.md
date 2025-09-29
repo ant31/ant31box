@@ -17,7 +17,7 @@ pip install .
 pip install -e .[dev,s3] # Include extras like s3 if needed
 ```
 
-*(Requires Python >= 3.11)*
+*(Requires Python >= 3.12)*
 
 ## Usage
 
@@ -64,6 +64,8 @@ class MyAppConfig(Config[MyAppConfigSchema]):
      __config_class__ = MyAppConfigSchema
 
 # Load configuration (searches for localconfig.yaml, config.yaml by default)
+# Load configuration once and pass it to components that need it.
+# This approach uses dependency injection and is the recommended pattern.
 # Set the custom config class before first call to config()
 conf: MyAppConfig = config(confclass=MyAppConfig)
 

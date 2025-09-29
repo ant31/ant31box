@@ -9,7 +9,7 @@ import uvicorn
 
 from ant31box.config import Config
 from ant31box.config import config as confload
-from ant31box.init import init
+from ant31box.init import init_from_config
 
 app = typer.Typer()
 
@@ -27,7 +27,7 @@ class LogLevel(str, enum.Enum):
 def run_server(config: Config):
     logger.info("Starting server")
     typer.echo(f"{config.server.model_dump()}")
-    init(config.conf, "fastapi")
+    init_from_config(config, "fastapi")
     uvicorn.run(
         config.server.server,
         host=config.server.host,

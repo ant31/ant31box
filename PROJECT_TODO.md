@@ -8,15 +8,15 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
 
 **Goal:** Establish a rock-solid, scalable, and testable foundation by eliminating architectural flaws like global state and ensuring true asynchronicity.
 
--   [ ] **Decouple Configuration (Eliminate Singleton):**
-    -   [ ] Remove the global `GConfig` singleton pattern from `ant31box/config.py`.
-    -   [ ] Refactor components that depend on `config()` (e.g., `serve()`, `DownloadClient`) to accept the configuration object via explicit dependency injection.
-    -   [ ] Update tests to pass configuration objects to components instead of relying on the `reset_config` fixture.
+-   [x] **Decouple Configuration (Introduce Dependency Injection):**
+    -   [x] Refactor components that depend on `config()` (e.g., `serve()`, `DownloadClient`, CLI commands) to accept an optional configuration object via dependency injection, maintaining backward compatibility.
+    -   [x] Update tests to use the new dependency injection pattern with a `test_config` fixture.
     -   [ ] Update all documentation and examples to reflect the dependency injection pattern.
+    -   [ ] *Future Task:* Remove the global `GConfig` singleton pattern from `ant31box/config.py` in a future major version release after a deprecation period.
 
--   [ ] **Ensure True Asynchronicity:**
-    -   [ ] Add `aioboto3` as a dependency for S3 operations.
-    -   [ ] Rewrite `ant31box/s3.py` and the S3 methods in `ant31box/client/filedl.py` to use `aioboto3` and be fully `async/await`, removing all blocking I/O calls.
+-   [x] **Ensure True Asynchronicity:**
+    -   [x] Add `aioboto3` as a dependency for S3 operations.
+    -   [x] Rewrite `ant31box/s3.py` and the S3 methods in `ant31box/client/filedl.py` to use `aioboto3` and be fully `async/await`, removing all blocking I/O calls.
     -   [ ] Audit the entire codebase for any other hidden synchronous I/O calls within `async` functions.
 
 ---

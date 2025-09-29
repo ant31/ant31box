@@ -8,7 +8,7 @@ from uvicorn.importer import import_from_string
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from ant31box.config import Config, FastAPIConfigSchema, config
-from ant31box.init import init
+from ant31box.init import init, init_from_config
 
 from .middlewares.errors import catch_exceptions_middleware
 from .middlewares.process_time import add_process_time_header
@@ -124,7 +124,7 @@ class Server:
 
 
 def serve_from_config(conf: Config, server_class: type[Server] = Server) -> FastAPI:
-    init(conf.conf, "fastapi")
+    init_from_config(conf, "fastapi")
     if not issubclass(server_class, Server):
         raise TypeError(f"server must be a subclass or instance of {Server}")
 
@@ -133,5 +133,14 @@ def serve_from_config(conf: Config, server_class: type[Server] = Server) -> Fast
 
 
 # override this method to use a different server class/config
-def serve() -> FastAPI:
-    return serve_from_config(config(), Server)
+def serve(conf: Config | None = None) -> FastAPI:
+    """
+    Creates the FastAPI application.
+
+    Args:
+        conf: A configuration object. If None, the global singleton config is used.
+              The use of the global singleton is deprecated and will be removed in a future version.
+    """
+    if conf is None:
+        conf = config()
+    return serve_from_config(conf, Server)
