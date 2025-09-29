@@ -4,9 +4,13 @@ This guide outlines the breaking changes, deprecations, and other updates requir
 
 ## Migrating to Version 0.4.0
 
-Version `0.4.0` introduces significant architectural improvements, focusing on dependency injection and true asynchronicity. While backward compatibility has been maintained, several key components are now deprecated.
+Version `0.4.0` introduces significant architectural improvements, focusing on dependency injection, true asynchronicity, and optional database integration. While backward compatibility has been maintained, several key components are now deprecated.
 
-### 1. Deprecation of Global `config()`
+### 1. Optional Database Integration (`achemy`)
+
+The new database features require the `achemy` library. If your project uses these features, you must add `achemy` to your dependencies. Projects not using the database layer are unaffected.
+
+### 2. Deprecation of Global `config()`
 
 The global `config()` singleton is now deprecated. The recommended approach is to load your configuration once at your application's entry point and pass the `Config` object explicitly to the functions and classes that require it.
 
