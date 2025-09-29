@@ -20,11 +20,19 @@ def hello(
         str,
         typer.Option("--name", "-n", help="The name to greet."),
     ] = "World",
+    config_path: Annotated[
+        str | None,
+        typer.Option("--config", "-c", help="Path to config file."),
+    ] = None,
 ) -> None:
     """
-    A simple command that greets the user.
+    A simple command that greets the user and loads configuration.
     """
-    typer.echo(f"Hello, {name}!")
+    # Adhere to the DI pattern by loading config explicitly
+    from ant31box.config import config
+    conf = config(path=config_path)
+
+    typer.echo(f"Hello, {name} from env: {conf.app.env}!")
 
 @app.command()
 def goodbye(

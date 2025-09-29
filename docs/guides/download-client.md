@@ -18,7 +18,7 @@ s3_conf = S3ConfigSchema(bucket="my-bucket") # Add credentials/region as needed
 full_client = DownloadClient(s3_config=s3_conf)
 ```
 
-A `filedl_client` factory is also available, which can create a client from your application's global configuration.
+A `filedl_client` factory is also available. It's recommended to pass the configuration object to it explicitly.
 
 ## Downloading Files
 
@@ -27,8 +27,17 @@ The `download()` method is the single entry point. It automatically detects the 
 ### Download from HTTP/HTTPS
 
 ```python
+from ant31box.config import config
+
+# Load config once
+conf = config()
+
+# Create client using dependency injection
+client = DownloadClient()
+
+
 # Download to a specified directory. The original filename is used.
-file_info = await http_client.download(
+file_info = await client.download(
     source="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png",
     dest_dir="/tmp/downloads"
 )
@@ -37,7 +46,7 @@ print(f"File downloaded to: {file_info.path}")
 # > File downloaded to: /tmp/downloads/python-logo-master-v3-TM.png
 
 # Download to a specific file path
-await http_client.download(
+await client.download(
     source="...",
     output="/tmp/my_logo.png"
 )
@@ -45,7 +54,7 @@ await http_client.download(
 # Download into an in-memory file-like object
 from io import BytesIO
 buffer = BytesIO()
-file_info = await http_client.download(
+file_info = await client.download(
     source="...",
     output=buffer
 )

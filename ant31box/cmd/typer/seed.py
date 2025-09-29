@@ -72,7 +72,7 @@ async def run_seeder(seeder_func, conf: Config):
         )
         raise typer.Exit(1)
 
-    engine = get_engine()
+    engine = get_engine(conf)
     _, session_factory = engine.session()
 
     async with session_factory() as session:

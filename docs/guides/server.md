@@ -49,13 +49,14 @@ In your application entry point (`main.py`), load the configuration and call `se
 from ant31box.config import config
 from ant31box.server.server import serve
 
-# Load configuration from file and environment
+# Load configuration once at the application's entry point
 conf = config()
 
-# The serve() function will automatically find and load your router
+# Pass the configuration object to the serve function
 app = serve(conf=conf)
 
-# To run: uvicorn main:app --reload
+# To run with the ant31box CLI:
+# ant31box server --config config.yaml
 ```
 
 **4. Run the server:**

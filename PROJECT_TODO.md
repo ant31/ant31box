@@ -11,7 +11,7 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
 -   [x] **Decouple Configuration (Introduce Dependency Injection):**
     -   [x] Refactor components that depend on `config()` (e.g., `serve()`, `DownloadClient`, CLI commands) to accept an optional configuration object via dependency injection, maintaining backward compatibility.
     -   [x] Update tests to use the new dependency injection pattern with a `test_config` fixture.
-    -   [ ] Update all documentation and examples to reflect the dependency injection pattern.
+    -   [x] Update all documentation and examples to reflect the dependency injection pattern.
     -   [ ] *Future Task:* Remove the global `GConfig` singleton pattern from `ant31box/config.py` in a future major version release after a deprecation period.
 
 -   [x] **Ensure True Asynchronicity:**
