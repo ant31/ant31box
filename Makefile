@@ -127,6 +127,7 @@ upgrade-dep:
 	uv sync --upgrade
 	uv lock -U --resolution=highest
 
+.PHONY: docs serve-docs
 docs:
 	uv run mkdocs build
 
