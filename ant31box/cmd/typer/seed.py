@@ -6,6 +6,7 @@ import typer
 
 from ant31box.config import Config
 from ant31box.config import config as confload
+from ant31box.db import get_engine
 from ant31box.importer import import_from_string
 
 app = typer.Typer(help="Database seeding commands.")
@@ -61,9 +62,7 @@ async def run_seeder(seeder_func, conf: Config):
     """
     Helper to set up the database engine and session for the seeder.
     """
-    try:
-        from ant31box.db import get_engine
-    except ImportError as e:
+    if get_engine is None:
         typer.echo(
             typer.style(
                 "Database components not found. Please install 'achemy' for database functionality.",
@@ -71,7 +70,7 @@ async def run_seeder(seeder_func, conf: Config):
             ),
             err=True,
         )
-        raise typer.Exit(1) from e
+        raise typer.Exit(1)
 
     engine = get_engine()
     _, session_factory = engine.session()
