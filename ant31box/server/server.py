@@ -28,8 +28,13 @@ async def lifespan(app: FastAPI):
         # If achemy is not installed, do nothing.
         yield
         return
+    if not hasattr(app.state, "config"):
+        # If config is not in state, do nothing to maintain compatibility
+        # with scenarios where lifespan is used without the full server setup.
+        yield
+        return
 
-    engine = get_engine()
+    engine = get_engine(app.state.config)
     _, session_factory = engine.session()
     app.state.engine = engine
     app.state.session_factory = session_factory
@@ -151,6 +156,7 @@ def serve_from_config(conf: Config, server_class: type[Server] = Server) -> Fast
         raise TypeError(f"server must be a subclass or instance of {Server}")
 
     server = server_class(conf.server, conf.name, conf.app.env)
+    server.app.state.config = conf
 
     # Attach the lifespan manager if not running in test environment
     if conf.app.env != "test":
