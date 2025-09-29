@@ -22,13 +22,20 @@ async def lifespan(app: FastAPI):
     """
     Manage the database engine lifespan within the FastAPI application lifecycle.
     Initializes the engine on startup and disposes of it on shutdown.
+    This is only active if the 'achemy' package is installed.
     """
-    engine = get_engine()
-    _, session_factory = engine.session()
-    app.state.engine = engine
-    app.state.session_factory = session_factory
-    yield
-    await engine.dispose_engines()
+    try:
+        from ant31box.db import get_engine
+
+        engine = get_engine()
+        _, session_factory = engine.session()
+        app.state.engine = engine
+        app.state.session_factory = session_factory
+        yield
+        await engine.dispose_engines()
+    except ImportError:
+        # If achemy is not installed, do nothing.
+        yield
 
 
 def cors(server: "Server"):

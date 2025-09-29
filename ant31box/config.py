@@ -54,6 +54,7 @@ class BaseConfig(BaseModel):
 class AppConfigSchema(BaseConfig):
     env: str = Field(default="dev")
     prometheus_dir: str = Field(default="/tmp/prometheus")
+    seeder: str | None = Field(default=None, description="Import string for the database seeder function.")
 
 
 class CorsConfigSchema(BaseConfig):

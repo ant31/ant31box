@@ -83,6 +83,12 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
     -   [x] Implement database engine lifecycle management within the FastAPI server.
     -   [ ] Create documentation and examples for defining models and using the repository pattern.
 
+-   [ ] **Add a Database Seeding Framework:**
+    -   [ ] Add a `seeder` configuration option to `AppConfigSchema`.
+    -   [ ] Create a `seed` command in the `typer` CLI that dynamically loads and runs the seeder function.
+    -   [ ] The command should provide a database session to the seeder function.
+    -   [ ] Write a guide on how to create and use a seeder.
+
 -   [ ] **Structured, Production-Ready Logging:**
     -   [ ] Implement a logger configuration that can easily switch between colorized console logging (for development) and structured JSON logging (for production).
     -   [ ] Ensure FastAPI access logs also follow the structured logging format.
