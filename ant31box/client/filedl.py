@@ -118,12 +118,12 @@ class DownloadClient(BaseClient):
 
         if hasattr(output, "write"):
             # write to file-like object
-            await self.s3.download_file(s3url=s3url.to_model(), dest=output)
+            await self.s3.download_file_async(s3url=s3url.to_model(), dest=output)
             fd.content = output
         elif isinstance(output, Path | str):
             # write to file on disk
             async with aiofiles.open(str(output), "wb") as fileobj:
-                await self.s3.download_file(s3url=s3url.to_model(), dest=fileobj)
+                await self.s3.download_file_async(s3url=s3url.to_model(), dest=fileobj)
             fd.path = output
         return fd
 

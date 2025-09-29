@@ -175,7 +175,7 @@ async def test_filedl_file_scheme_file_s3():
         dest = "toto/test.pdf"
         async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
             await s3_client.create_bucket(Bucket=client.s3.bucket)
-        await client.s3.upload_file(filepath=tmp, dest=dest)
+        await client.s3.upload_file_async(filepath=tmp, dest=dest)
         uri = f"s3://{client.s3.bucket}/{dest}"
         resp = await client.download(source=uri, dest_dir=dir)
     assert isinstance(resp, FileInfo)
@@ -201,7 +201,7 @@ async def test_filedl_file_scheme_output_s3():
 
         async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
             await s3_client.create_bucket(Bucket=client.s3.bucket)
-        await client.s3.upload_file(filepath=tmp, dest=dest)
+        await client.s3.upload_file_async(filepath=tmp, dest=dest)
     with NamedTemporaryFile() as output:
         uri = f"s3://{client.s3.bucket}/{dest}"
         resp = await client.download(source=uri, dest_dir="", output=output)

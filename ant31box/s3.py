@@ -47,7 +47,21 @@ class S3Client:
             dest = Path(filename).name
         return f"{self.prefix}{dest}"
 
+    @make_sync
     async def upload_file(self, filepath: str | IOBase | BinaryIO, dest: str = "") -> S3Dest:
+        """
+        Synchronous method to upload a file. Deprecated.
+        Please use `upload_file_async` instead.
+        """
+        warnings.warn(
+            "S3Client.upload_file is deprecated and will be removed in a future version. "
+            "Use S3Client.upload_file_async instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.upload_file_async(filepath, dest)
+
+    async def upload_file_async(self, filepath: str | IOBase | BinaryIO, dest: str = "") -> S3Dest:
         path = dest if isinstance(filepath, (IOBase, BinaryIO)) else self.buildpath(filepath, dest)
         logger.info("upload s3 bucket='%s' file='%s' dest='%s'", self.bucket, filepath, path)
 
@@ -65,7 +79,23 @@ class S3Client:
             path = path.lstrip("/")
         return S3URL(bucket=self.bucket, key=path)
 
+    @make_sync
     async def download_file(self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO) -> str | IOBase | BinaryIO:
+        """
+        Synchronous method to download a file. Deprecated.
+        Please use `download_file_async` instead.
+        """
+        warnings.warn(
+            "S3Client.download_file is deprecated and will be removed in a future version. "
+            "Use S3Client.download_file_async instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.download_file_async(s3url, dest)
+
+    async def download_file_async(
+        self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO
+    ) -> str | IOBase | BinaryIO:
         logger.info("download uri='%s', dest='%s'", s3url.url, dest)
         async with self.session.resource("s3", **self._boto_client_args(self.options)) as s3:
             bucket = await s3.Bucket(s3url.bucket)
@@ -75,7 +105,35 @@ class S3Client:
                 await bucket.download_fileobj(s3url.key, dest)
         return dest
 
+    @make_sync
     async def copy_s3_to_s3(
+        self,
+        *,
+        src_bucket: str,
+        src_path: str,
+        dest_bucket: str,
+        dest_prefix: str = "",
+        name_only: bool = False,
+    ) -> tuple[S3Dest, S3Dest]:
+        """
+        Synchronous method to copy a file between S3 locations. Deprecated.
+        Please use `copy_s3_to_s3_async` instead.
+        """
+        warnings.warn(
+            "S3Client.copy_s3_to_s3 is deprecated and will be removed in a future version. "
+            "Use S3Client.copy_s3_to_s3_async instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.copy_s3_to_s3_async(
+            src_bucket=src_bucket,
+            src_path=src_path,
+            dest_bucket=dest_bucket,
+            dest_prefix=dest_prefix,
+            name_only=name_only,
+        )
+
+    async def copy_s3_to_s3_async(
         self,
         *,
         src_bucket: str,
