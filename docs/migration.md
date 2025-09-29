@@ -32,12 +32,14 @@ from ant31box.config import config
 from ant31box.server.server import serve
 from ant31box.clients import filedl_client
 
-# Load config once
-conf = config()
+def main():
+    # Load config once in your application's entry point
+    conf = config()
 
-# Inject the config object
-app = serve(conf=conf)
-client = filedl_client(conf=conf)
+    # Inject the config object
+    app = serve(conf=conf)
+    client = filedl_client(conf=conf)
+    # ...
 ```
 
 ### 2. Deprecation of Synchronous S3 Methods

@@ -49,11 +49,15 @@ In your application entry point (`main.py`), load the configuration and call `se
 from ant31box.config import config
 from ant31box.server.server import serve
 
-# Load configuration once at the application's entry point
-conf = config()
+def main():
+    # Load configuration once at the application's entry point
+    conf = config()
 
-# Pass the configuration object to the serve function
-app = serve(conf=conf)
+    # Pass the configuration object to the serve function
+    return serve(conf=conf)
+
+# The `app` object needs to be available at the module level for Uvicorn
+app = main()
 
 # To run with the ant31box CLI:
 # ant31box server --config config.yaml

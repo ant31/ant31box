@@ -27,40 +27,40 @@ The `download()` method is the single entry point. It automatically detects the 
 ### Download from HTTP/HTTPS
 
 ```python
+import asyncio
+from io import BytesIO
+
+from ant31box.client.filedl import DownloadClient
 from ant31box.config import config
 
-# Load config once
-conf = config()
 
-# Create client using dependency injection
-client = DownloadClient()
+async def main():
+    # Load config once inside the application's entry point
+    conf = config()
+
+    # The DownloadClient takes an optional S3 config at initialization.
+    # We'll create a basic one here for demonstration.
+    client = DownloadClient(s3_config=conf.conf.s3 if hasattr(conf.conf, "s3") else None)
+
+    # Download to a specified directory. The original filename is used.
+    file_info = await client.download(
+        source="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png",
+        dest_dir="/tmp/downloads",
+    )
+    print(f"File downloaded to: {file_info.path}")
+
+    # Download into an in-memory file-like object
+    buffer = BytesIO()
+    await client.download(
+        source="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png", output=buffer
+    )
+    buffer.seek(0)
+    image_data = buffer.read()
+    print(f"Downloaded {len(image_data)} bytes into memory.")
 
 
-# Download to a specified directory. The original filename is used.
-file_info = await client.download(
-    source="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png",
-    dest_dir="/tmp/downloads"
-)
-
-print(f"File downloaded to: {file_info.path}")
-# > File downloaded to: /tmp/downloads/python-logo-master-v3-TM.png
-
-# Download to a specific file path
-await client.download(
-    source="...",
-    output="/tmp/my_logo.png"
-)
-
-# Download into an in-memory file-like object
-from io import BytesIO
-buffer = BytesIO()
-file_info = await client.download(
-    source="...",
-    output=buffer
-)
-buffer.seek(0)
-image_data = buffer.read()
-print(f"Downloaded {len(image_data)} bytes into memory.")
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Download from S3

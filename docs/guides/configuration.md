@@ -35,11 +35,19 @@ The configuration is loaded via the `config()` function in `ant31box/config.py`.
 # In your main.py or application entry point
 from ant31box.config import config, DefaultConfig
 
-# Load config from default paths (localconfig.yaml, config.yaml) or environment variables
-conf: DefaultConfig = config()
+def main():
+    # Load config from default paths (localconfig.yaml, config.yaml) or environment variables
+    conf: DefaultConfig = config()
 
-# Load config from a specific YAML file
-conf_from_file: DefaultConfig = config(path="/path/to/my/config.yaml")
+    # Load config from a specific YAML file
+    conf_from_file: DefaultConfig = config(path="/path/to/my/config.yaml")
+
+    # Use the config objects...
+    print(conf.app.env)
+    print(conf_from_file.app.env)
+
+if __name__ == "__main__":
+    main()
 ```
 
 The CLI commands also provide an option to specify a configuration file using the `-c` or `--config` flag.

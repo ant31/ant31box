@@ -41,11 +41,15 @@ def create_s3_client(conf: Config) -> S3Client:
 # --- Usage ---
 from ant31box.config import config
 
-# Load config once at the application's entry point
-main_config = config()
+def main():
+    # Load config once at the application's entry point
+    main_config = config()
 
-# Inject the dependency
-s3_client = create_s3_client(conf=main_config)
+    # Inject the dependency
+    s3_client = create_s3_client(conf=main_config)
+
+if __name__ == "__main__":
+    main()
 ```
 
 ### Benefits of This Approach
