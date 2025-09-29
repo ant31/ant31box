@@ -49,6 +49,7 @@ all = [
 
 [project.scripts]
 ant31box = "ant31box.cmd.typer.main:main"
+ant31box-click = "ant31box.cmd.main:main"
 
 [dependency-groups]
 dev = [

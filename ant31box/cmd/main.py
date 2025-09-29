@@ -15,7 +15,8 @@ def cli(ctx: click.Context) -> None:
 
 def main():
     warnings.warn(
-        "The click-based CLI is deprecated and will be removed in a future version. Please use the typer-based CLI.",
+        "The click-based CLI (`ant31box-click`) is deprecated and will be removed in a future version. "
+        "Please use the typer-based CLI (`ant31box`).",
         DeprecationWarning,
         stacklevel=2,
     )
