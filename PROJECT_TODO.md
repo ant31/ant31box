@@ -29,7 +29,8 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
     -   [x] Chose `typer` as the official CLI framework for the project.
     -   [x] Update the `[project.scripts]` entry point in `pyproject.toml` to point to the main `typer` application.
     -   [x] Ensure all CLI-related documentation and examples use `typer`.
-    -   [ ] *Future Task*: Delete the `ant31box/cmd` directory and its contents in a future major version release after a deprecation period.
+    -   [x] Add a separate `ant31box-click` entry point for backward compatibility and issue a `DeprecationWarning`.
+    -   [ ] *Future Task:* Remove the `click`-based CLI in `ant31box/cmd` in a future major version release after a deprecation period.
 
 -   [x] **Eliminate Code Duplication:**
     -   [x] Delete `ant31box/utilsd.py`.
