@@ -10,7 +10,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from ant31box.importer import deepmerge
+from ant31box.utils import deepmerge
 
 LOG_LEVELS: dict[str, int] = {
     "critical": logging.CRITICAL,
@@ -220,13 +220,17 @@ class GenericConfig[TBaseConfig: BaseSettings]:
     @classmethod
     def from_yaml(cls, file_path: str) -> Self:
         with open(file_path, encoding="utf-8") as file:
-            config_dict = yaml.safe_load(file)
-        # merge init + env config
-        alreadyinit = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
-        deepmerge(config_dict, alreadyinit)
-        logger.debug("Config loaded from %s: %s", file_path, config_dict)
+            yaml_config = yaml.safe_load(file) or {}
 
-        return cls(cls.__config_class__.model_validate(config_dict))
+        # Pydantic-settings loads from environment variables automatically on instantiation.
+        env_config = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
+
+        # Merge the YAML config into the environment variable config.
+        # This ensures that environment variables take precedence.
+        merged_config = deepmerge(yaml_config, env_config)
+        logger.debug("Config loaded from %s: %s", file_path, merged_config)
+
+        return cls(cls.__config_class__.model_validate(merged_config))
 
     @classmethod
     def default_config(cls) -> Self:
