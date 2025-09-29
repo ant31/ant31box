@@ -44,8 +44,8 @@ def test_s3url_parse():
     assert client.s3url("test/key.pdf").url == "s3://abucket/test/key.pdf"
 
 
-@pytest.mark.asyncio
 @mock_aws
+@pytest.mark.asyncio
 async def test_s3_upload_from_file():
     client = S3Client(S3ConfigSchema(secret_key="a", access_key="a", region="us-east-1"))
     with NamedTemporaryFile() as tmp:
@@ -61,8 +61,8 @@ async def test_s3_upload_from_file():
         assert a.url == f"s3://{client.bucket}/{dest}"
 
 
-@pytest.mark.asyncio
 @mock_aws
+@pytest.mark.asyncio
 async def test_s3_upload_from_file_nodest():
     client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a", region="us-east-1"))
     with NamedTemporaryFile() as tmp:
@@ -76,8 +76,8 @@ async def test_s3_upload_from_file_nodest():
         assert a.url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
 
 
-@pytest.mark.asyncio
 @mock_aws
+@pytest.mark.asyncio
 async def test_s3_download_to_file():
     client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a", region="us-east-1"))
     with NamedTemporaryFile() as tmp:
@@ -97,8 +97,8 @@ async def test_s3_download_to_file():
         assert output.read() == b"test"
 
 
-@pytest.mark.asyncio
 @mock_aws
+@pytest.mark.asyncio
 async def test_s3_copy_s3_s3():
     client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a", region="us-east-1"))
     bucket2 = "bucketcopy"

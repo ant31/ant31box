@@ -162,8 +162,8 @@ async def test_filedl_file_scheme():
         assert resp.content is None
 
 
-@pytest.mark.asyncio
 @mock_aws
+@pytest.mark.asyncio
 async def test_filedl_file_scheme_file_s3():
     client = DownloadClient()
     client.set_s3(S3ConfigSchema(secret_key="a", access_key="a", region="us-east-1"))
@@ -188,8 +188,8 @@ async def test_filedl_file_scheme_file_s3():
     assert resp.content is None
 
 
-@pytest.mark.asyncio
 @mock_aws
+@pytest.mark.asyncio
 async def test_filedl_file_scheme_output_s3():
     client = DownloadClient()
     client.set_s3(S3ConfigSchema(secret_key="a", access_key="a", region="us-east-1"))
