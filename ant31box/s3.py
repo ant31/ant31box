@@ -7,7 +7,7 @@ import aioboto3
 from botocore.client import Config
 
 from ant31box.config import S3ConfigSchema
-from ant31box.models import S3Dest, S3URL
+from ant31box.models import S3URL, S3Dest
 
 logger: logging.Logger = logging.getLogger(__name__)
 

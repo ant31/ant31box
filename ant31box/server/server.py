@@ -8,7 +8,7 @@ from uvicorn.importer import import_from_string
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from ant31box.config import Config, FastAPIConfigSchema, config
-from ant31box.init import init, init_from_config
+from ant31box.init import init_from_config
 
 from .middlewares.errors import catch_exceptions_middleware
 from .middlewares.process_time import add_process_time_header
