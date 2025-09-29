@@ -2,7 +2,6 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
 
-import aioboto3
 import aiohttp
 import pytest
 

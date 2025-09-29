@@ -2,7 +2,6 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-import aioboto3
 import pytest
 
 from ant31box.config import S3ConfigSchema
