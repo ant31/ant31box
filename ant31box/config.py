@@ -134,6 +134,30 @@ class S3ConfigSchema(BaseConfig):
     bucket: str = Field(default="abucket")
 
 
+class DatabaseConfig(BaseConfig):
+    """Pydantic model for database connection details."""
+
+    driver: str = Field(default="asyncpg")
+    host: str = Field(default="localhost")
+    port: int = Field(default=5432)
+    user: str = Field(default="user")
+    password: str = Field(default="password")
+    db: str = Field(default="db")
+    pool_size: int = Field(default=10)
+    pool_recycle: int = Field(default=3600)
+    echo: bool = Field(default=False)
+    application_name: str | None = Field(default=None)
+    params: dict[str, str] = Field(default_factory=dict)
+
+    @property
+    def dsn(self) -> str:
+        """SQLAlchemy DSN."""
+        base = f"postgresql+{self.driver}://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
+        if self.params:
+            base += f"?{'&'.join([f'{k}={v}' for k, v in self.params.items()])}"
+        return base
+
+
 # Main configuration schema
 class ConfigSchema(BaseSettings):
     model_config = SettingsConfigDict(
@@ -143,6 +167,7 @@ class ConfigSchema(BaseSettings):
     logging: LoggingConfigSchema = Field(default_factory=LoggingConfigSchema)
     server: FastAPIConfigSchema = Field(default_factory=FastAPIConfigSchema)
     sentry: SentryConfigSchema = Field(default_factory=SentryConfigSchema)
+    database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     name: str = Field(default="ant31box")
 
 
@@ -284,6 +309,10 @@ class Config[TConfigSchema: ConfigSchema](GenericConfig[TConfigSchema]):
     @property
     def sentry(self) -> SentryConfigSchema:
         return self.conf.sentry
+
+    @property
+    def database(self) -> DatabaseConfig:
+        return self.conf.database
 
     @property
     def app(self) -> AppConfigSchema:

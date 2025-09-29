@@ -75,10 +75,12 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
 
 **Goal:** Add critical, opinionated integrations that are essential for modern microservices.
 
--   [ ] **Add a Database Layer (Opinionated Choice):**
-    -   [ ] Integrate `achemy` (or another SQLAlchemy 2.0 async toolkit) as the default database library.
-    -   [ ] Provide a base repository pattern and session management helpers that integrate with the FastAPI server (e.g., a `Depends` provider for sessions/repositories).
-    -   [ ] Add a `DatabaseConfigSchema` to the main configuration.
+-   [x] **Add a Database Layer (Opinionated Choice):**
+    -   [x] Integrate `achemy` (or another SQLAlchemy 2.0 async toolkit) as the default database library.
+    -   [x] Provide a base repository pattern and session management helpers that integrate with the FastAPI server (e.g., a `Depends` provider for sessions/repositories).
+    -   [x] Add a `DatabaseConfigSchema` to the main configuration.
+    -   [x] Add a generic `get_db_session` dependency provider in `ant31box.server.dependencies`.
+    -   [x] Implement database engine lifecycle management within the FastAPI server.
     -   [ ] Create documentation and examples for defining models and using the repository pattern.
 
 -   [ ] **Structured, Production-Ready Logging:**

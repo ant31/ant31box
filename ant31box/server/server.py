@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import ClassVar
 
 from fastapi import FastAPI
@@ -8,11 +9,26 @@ from uvicorn.importer import import_from_string
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from ant31box.config import Config, FastAPIConfigSchema, config
+from ant31box.db import get_engine
 from ant31box.init import init_from_config
 
 from .middlewares.errors import catch_exceptions_middleware
 from .middlewares.process_time import add_process_time_header
 from .middlewares.token import TokenAuthMiddleware
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manage the database engine lifespan within the FastAPI application lifecycle.
+    Initializes the engine on startup and disposes of it on shutdown.
+    """
+    engine = get_engine()
+    _, session_factory = engine.session()
+    app.state.engine = engine
+    app.state.session_factory = session_factory
+    yield
+    await engine.dispose_engines()
 
 
 def cors(server: "Server"):
@@ -129,6 +145,11 @@ def serve_from_config(conf: Config, server_class: type[Server] = Server) -> Fast
         raise TypeError(f"server must be a subclass or instance of {Server}")
 
     server = server_class(conf.server, conf.name, conf.app.env)
+
+    # Attach the lifespan manager if not running in test environment
+    if conf.app.env != "test":
+        server.app.router.lifespan_context = lifespan
+
     return server.app
 
 
