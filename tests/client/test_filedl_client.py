@@ -183,9 +183,9 @@ async def test_filedl_file_scheme_file_s3():
         assert f.read() == b"test"
 
     assert resp.filename == "test.pdf"
-        assert resp.source == uri
-        assert str(resp.path) == str(Path(dir).joinpath(resp.filename))
-        assert resp.content is None
+    assert resp.source == uri
+    assert str(resp.path) == str(Path(dir).joinpath(resp.filename))
+    assert resp.content is None
 
 
 @pytest.mark.asyncio
