@@ -48,7 +48,7 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
 -   [ ] **Write In-Depth Guides for Core Features:**
     -   [ ] **Configuration:** A detailed guide on extending `ConfigSchema`, the file and environment variable loading hierarchy, and best practices.
     -   [ ] **FastAPI Server:** Document how to add/replace middlewares and routers, how the default setup works, and how to extend the `Server` class for advanced use cases.
-    -   [ ] **CLI:** Explain how to add new commands and groups to the application's CLI.
+    -   [x] **CLI:** Explain how to add new commands and groups to the application's CLI.
 
 -   [ ] **Generate a Complete API Reference:**
     -   [ ] Add comprehensive, Google-style docstrings to all public modules, classes, and functions.
@@ -82,7 +82,7 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
     -   [x] Add a `DatabaseConfigSchema` to the main configuration.
     -   [x] Add a generic `get_db_session` dependency provider in `ant31box.server.dependencies`.
     -   [x] Implement database engine lifecycle management within the FastAPI server.
-    -   [ ] Create documentation and examples for defining models and using the repository pattern.
+    -   [x] Create documentation and examples for defining models and using the repository pattern.
 
 -   [x] **Add a Database Seeding Framework:**
     -   [x] Add a `seeder` configuration option to `AppConfigSchema`.

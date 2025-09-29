@@ -1,6 +1,6 @@
 # Guide: Database Seeding
 
-Database seeding is the process of populating a database with an initial set of data, such as lookup table values (`Roles`, `Statuses`) or default administrative users. `ant31box` provides a standardized CLI command to make this process easy to integrate into your application.
+Database seeding is the process of populating a database with an initial set of data, such as lookup table values (`Roles`, `Statuses`) or default administrative users. `ant31box` provides a standardized CLI command to make this process easy to integrate into your application. This feature relies on `achemy`, which is an optional dependency.
 
 ## Step 1: Create a Seeder Function
 
@@ -29,15 +29,24 @@ async def seed_all(session: AsyncSession):
 
 File: `my_app/seed/auth.py`
 ```python
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
-from my_app.models import Role
-from my_app.repositories import RoleRepository
+# Assuming you have these application-specific modules
+# from my_app.models import Role
+# from my_app.repositories import RoleRepository
+
+logger = logging.getLogger(__name__)
 
 async def seed_roles(session: AsyncSession):
     """Seed the default user roles."""
-    repo = RoleRepository(session)
-    if not await repo.find_by(name="admin"):
-        await repo.save(Role(name="admin"))
+    # This is a placeholder for your actual logic.
+    # You would typically use a repository to interact with the database.
+    # For example:
+    # repo = RoleRepository(session)
+    # if not await repo.find_by(name="admin"):
+    #     await repo.save(Role(name="admin"))
+    logger.info("Seeding roles (example)...")
+    pass
 ```
 
 ## Step 2: Configure the Seeder Path
@@ -66,9 +75,9 @@ With the configuration in place, you can now use the built-in `seed db` command 
 
 Run the command from your terminal:
 ```bash
-# Assuming your CLI entry point is 'my-cli'
-my-cli seed db
+# Using the default ant31box CLI
+ant31box seed db
 
 # You can also specify a config file
-my-cli seed db --config config.prod.yaml
+ant31box seed db --config config.prod.yaml
 ```

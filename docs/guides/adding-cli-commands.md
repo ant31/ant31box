@@ -10,6 +10,7 @@ First, create a new Python file for your commands. For example, `my_app/cli.py`.
 # my_app/cli.py
 from typing import Annotated
 import typer
+from ant31box.config import config
 
 # It's common to create a typer "sub-application" for a group of related commands
 app = typer.Typer(help="Custom commands for my application.")
@@ -29,7 +30,6 @@ def hello(
     A simple command that greets the user and loads configuration.
     """
     # Adhere to the DI pattern by loading config explicitly
-    from ant31box.config import config
     conf = config(path=config_path)
 
     typer.echo(f"Hello, {name} from env: {conf.app.env}!")
@@ -61,6 +61,7 @@ import typer
 from ant31box.cmd.typer.server import app as server_app
 from ant31box.cmd.typer.version import app as version_app
 from ant31box.cmd.typer.default_config import app as config_app
+from ant31box.cmd.typer.seed import app as seed_app
 
 # Import your custom command app
 from my_app.cli import app as my_app_cli
@@ -72,6 +73,8 @@ app = typer.Typer(no_args_is_help=True)
 app.add_typer(server_app, name="server")
 app.add_typer(version_app, name="version")
 app.add_typer(config_app, name="default-config")
+app.add_typer(seed_app, name="seed")
+
 
 # Add your app as a subcommand
 app.add_typer(my_app_cli, name="my-app")
@@ -110,5 +113,5 @@ my-cli my-app hello --name "Developer"
 
 Output:
 ```
-Hello, Developer!
+Hello, Developer from env: dev!
 ```
