@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
 
 import aiohttp
+import aioboto3
 import pytest
 from moto import mock_aws
 
