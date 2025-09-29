@@ -1,3 +1,5 @@
+import warnings
+
 import click
 
 from .default_config import default_config
@@ -12,6 +14,12 @@ def cli(ctx: click.Context) -> None:
 
 
 def main():
+    warnings.warn(
+        "The click-based CLI (`ant31box-click`) is deprecated and will be removed in a future version. "
+        "Please use the typer-based CLI (`ant31box`).",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     # start the FastAPI server
     cli.add_command(server)
     # Display version

@@ -9,7 +9,7 @@ import uvicorn
 
 from ant31box.config import LOG_LEVELS, Config
 from ant31box.config import config as confload
-from ant31box.init import init
+from ant31box.init import init_from_config
 
 LEVEL_CHOICES = click.Choice(list(LOG_LEVELS.keys()))
 logger = logging.getLogger("ant31box.info")
@@ -18,7 +18,7 @@ logger = logging.getLogger("ant31box.info")
 def run_server(config: Config):
     logger.info("Starting server")
     click.echo(f"{config.server.model_dump()}")
-    init(config.conf, "fastapi")
+    init_from_config(config, "fastapi")
     uvicorn.run(
         config.server.server,
         host=config.server.host,

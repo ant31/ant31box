@@ -10,7 +10,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from ant31box.utilsd import deepmerge
+from ant31box.utils import deepmerge
 
 LOG_LEVELS: dict[str, int] = {
     "critical": logging.CRITICAL,
@@ -54,6 +54,7 @@ class BaseConfig(BaseModel):
 class AppConfigSchema(BaseConfig):
     env: str = Field(default="dev")
     prometheus_dir: str = Field(default="/tmp/prometheus")
+    seeder: str | None = Field(default=None, description="Import string for the database seeder function.")
 
 
 class CorsConfigSchema(BaseConfig):
@@ -126,12 +127,36 @@ ENVPREFIX = "ANT31BOX"
 
 
 class S3ConfigSchema(BaseConfig):
-    endpoint: str = Field(default="https://s3.eu-central-1.amazonaws.com")
+    endpoint: str | None = Field(default=None)
     access_key: str = Field(default="")
     secret_key: str = Field(default="")
     region: str = Field(default="eu-central-1")
     prefix: str = Field(default="")
     bucket: str = Field(default="abucket")
+
+
+class DatabaseConfig(BaseConfig):
+    """Pydantic model for database connection details."""
+
+    driver: str = Field(default="asyncpg")
+    host: str = Field(default="localhost")
+    port: int = Field(default=5432)
+    user: str = Field(default="user")
+    password: str = Field(default="password")
+    db: str = Field(default="db")
+    pool_size: int = Field(default=10)
+    pool_recycle: int = Field(default=3600)
+    echo: bool = Field(default=False)
+    application_name: str | None = Field(default=None)
+    params: dict[str, str] = Field(default_factory=dict)
+
+    @property
+    def dsn(self) -> str:
+        """SQLAlchemy DSN."""
+        base = f"postgresql+{self.driver}://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
+        if self.params:
+            base += f"?{'&'.join([f'{k}={v}' for k, v in self.params.items()])}"
+        return base
 
 
 # Main configuration schema
@@ -143,6 +168,7 @@ class ConfigSchema(BaseSettings):
     logging: LoggingConfigSchema = Field(default_factory=LoggingConfigSchema)
     server: FastAPIConfigSchema = Field(default_factory=FastAPIConfigSchema)
     sentry: SentryConfigSchema = Field(default_factory=SentryConfigSchema)
+    database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     name: str = Field(default="ant31box")
 
 
@@ -220,13 +246,17 @@ class GenericConfig[TBaseConfig: BaseSettings]:
     @classmethod
     def from_yaml(cls, file_path: str) -> Self:
         with open(file_path, encoding="utf-8") as file:
-            config_dict = yaml.safe_load(file)
-        # merge init + env config
-        alreadyinit = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
-        deepmerge(config_dict, alreadyinit)
-        logger.debug("Config loaded from %s: %s", file_path, config_dict)
+            yaml_config = yaml.safe_load(file) or {}
 
-        return cls(cls.__config_class__.model_validate(config_dict))
+        # Pydantic-settings loads from environment variables automatically on instantiation.
+        env_config = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
+
+        # Merge the environment variable config into the YAML config.
+        # This ensures that environment variables take precedence.
+        merged_config = deepmerge(env_config, yaml_config)
+        logger.debug("Config loaded from %s: %s", file_path, merged_config)
+
+        return cls(cls.__config_class__.model_validate(merged_config))
 
     @classmethod
     def default_config(cls) -> Self:
@@ -280,6 +310,10 @@ class Config[TConfigSchema: ConfigSchema](GenericConfig[TConfigSchema]):
     @property
     def sentry(self) -> SentryConfigSchema:
         return self.conf.sentry
+
+    @property
+    def database(self) -> DatabaseConfig:
+        return self.conf.database
 
     @property
     def app(self) -> AppConfigSchema:

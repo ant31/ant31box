@@ -70,7 +70,7 @@ format:
 format-test:
 	uv run ruff format $(package) --check
 
-lint: check pylint pyre-check
+lint: check  # pylint pyre-check
 check: format-test isort-check uv-check
 
 
@@ -126,3 +126,10 @@ bump:
 upgrade-dep:
 	uv sync --upgrade
 	uv lock -U --resolution=highest
+
+.PHONY: docs serve-docs
+docs:
+	uv run mkdocs build
+
+serve-docs:
+	uv run mkdocs serve

@@ -1,0 +1,61 @@
+site_name: ant31box
+site_url: https://ant31.github.io/ant31box
+repo_url: https://github.com/ant31/ant31box
+repo_name: ant31/ant31box
+edit_uri: ""
+
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.instant
+    - navigation.top
+    - navigation.tracking
+    - navigation.integration
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github-alt
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Introduction:
+      - What is ant31box?: introduction/what-is-ant31box.md
+      - Key Features: introduction/key-features.md
+  - Release Notes:
+      - Changelog: changelog.md
+      - Migration Guide: migration.md
+  - Guides:
+      - Configuration: guides/configuration.md
+      - Creating a Server: guides/server.md
+      - Using the S3 Client: guides/s3-client.md
+      - Using the Download Client: guides/download-client.md
+      - Adding CLI Commands: guides/adding-cli-commands.md
+      - Creating Custom Clients: guides/base-client.md
+  - Concepts:
+      - Dependency Injection: concepts/dependency-injection.md
+      - Async Everywhere: concepts/async.md
+  - Contributing:
+      - Development Setup: contributing/development.md
+      - Coding Style: contributing/coding-style.md

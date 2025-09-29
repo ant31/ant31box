@@ -1,6 +1,7 @@
 [project]
 name = "ant31box"
-version = "0.3.1"
+version = "0.4.0"
+
 description = ""
 authors = [{ name = "ant31", email = "2t.antoine@gmail.com" }]
 requires-python = ">=3.12,<4"
@@ -19,6 +20,7 @@ dependencies = [
     "aioshutil",
     "python-multipart",
     "cachetools",
+    "aioboto3>=15.1.0",
 ]
 
 packages = [{ include = "ant31box" }]
@@ -29,7 +31,7 @@ fastapi = [
     "fastapi[all]",
 ]
 sentry = ["sentry-sdk"]
-s3 = ["boto3"]
+s3 = ["boto3", "aioboto3"]
 cli = [
     "click<8.20",
     "rich",
@@ -40,13 +42,15 @@ all = [
     "rich",
     "typer",
     "boto3",
+    "aioboto3",
     "sentry-sdk",
     "starlette-exporter",
     "fastapi[all]",
 ]
 
 [project.scripts]
-ant31box = "ant31box.main:main"
+ant31box = "ant31box.cmd.typer.main:main"
+ant31box-click = "ant31box.cmd.main:main"
 
 [dependency-groups]
 dev = [
@@ -57,8 +61,6 @@ dev = [
     "sentry-sdk",
     "starlette-exporter",
     "fastapi[all]",
-
-
     "aioresponses",
     "pyreadline",
     "pylint-pydantic",
@@ -79,8 +81,11 @@ dev = [
     "pytest-aioresponses",
     "types-cachetools",
     "moto",
+    "pytest-aioboto3",
     "ruff",
-    "bump-my-version>=1.1.2,<2",
+    "bump-my-version",
+    "mkdocs",
+    "mkdocs-material",
 ]
 
 [build-system]

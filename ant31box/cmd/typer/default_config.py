@@ -1,14 +1,18 @@
 import typer
 import yaml
 
-from ant31box.config import LOGGING_CONFIG, LoggingConfigSchema, config
+from ant31box.config import LOGGING_CONFIG, Config, LoggingConfigSchema, config
 
 app = typer.Typer()
 
 
 @app.command()
 def default_config() -> None:
-    """Shows the default configuration."""
-    conf = config()
+    """
+    Shows the default configuration.
+
+    This command uses the global config singleton (deprecated).
+    """
+    conf: Config = config()
     conf.conf.logging = LoggingConfigSchema(log_config=LOGGING_CONFIG)
     typer.echo(yaml.dump(conf.conf.model_dump(), default_flow_style=False))

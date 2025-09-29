@@ -1,11 +1,14 @@
 import logging
+import warnings
 from io import IOBase
 from pathlib import Path
 from typing import BinaryIO
 
+import aioboto3
 import boto3
 from botocore.client import Config
 
+from ant31box.asyncutils import make_sync
 from ant31box.config import S3ConfigSchema
 from ant31box.models import S3URL, S3Dest
 
@@ -14,9 +17,8 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 class S3Client:
     def __init__(self, options: S3ConfigSchema, bucket: str = "", prefix: str = ""):
-        kwargs: dict = self._boto_args(options)
         self.options = options
-        self.client = boto3.resource("s3", **kwargs)
+        self.session = aioboto3.Session(**self._boto_session_args(options))
         if not bucket:
             bucket = options.bucket
         if not prefix:
@@ -24,17 +26,37 @@ class S3Client:
         self.bucket: str = bucket
         self.prefix: str = prefix
 
-    @staticmethod
-    def _boto_args(options: S3ConfigSchema):
+    @property
+    def sync_client(self):
+        """Provides a synchronous boto3 client for backward compatibility."""
         kwargs: dict = {}
-        if options.endpoint:
-            kwargs["endpoint_url"] = options.endpoint
+        if self.options.endpoint:
+            kwargs["endpoint_url"] = self.options.endpoint
+        if self.options.region:
+            kwargs["region_name"] = self.options.region
+        if self.options.access_key:
+            kwargs["aws_access_key_id"] = self.options.access_key
+        if self.options.secret_key:
+            kwargs["aws_secret_access_key"] = self.options.secret_key
+        kwargs["config"] = Config(signature_version="s3v4")
+        return boto3.resource("s3", **kwargs)
+
+    @staticmethod
+    def _boto_session_args(options: S3ConfigSchema):
+        kwargs: dict = {}
         if options.region:
             kwargs["region_name"] = options.region
         if options.access_key:
             kwargs["aws_access_key_id"] = options.access_key
         if options.secret_key:
             kwargs["aws_secret_access_key"] = options.secret_key
+        return kwargs
+
+    @staticmethod
+    def _boto_client_args(options: S3ConfigSchema):
+        kwargs: dict = {}
+        if options.endpoint:
+            kwargs["endpoint_url"] = options.endpoint
         kwargs["config"] = Config(signature_version="s3v4")
         return kwargs
 
@@ -43,15 +65,30 @@ class S3Client:
             dest = Path(filename).name
         return f"{self.prefix}{dest}"
 
-    def upload_file(self, filepath: str | IOBase | BinaryIO, dest: str = "") -> S3Dest:
-        if isinstance(filepath, str):
-            path = self.buildpath(filepath, dest)
-            logger.info("upload s3 bucket='%s' file='%s' dest='%s'", self.bucket, filepath, path)
-            self.client.Bucket(self.bucket).upload_file(filepath, path)
-        else:
-            path = dest
-            logger.info("upload s3 bucket='%s' file='%s' dest='%s'", self.bucket, filepath, path)
-            self.client.Bucket(self.bucket).upload_fileobj(filepath, path)
+    @make_sync
+    async def upload_file(self, filepath: str | IOBase | BinaryIO, dest: str = "") -> S3Dest:
+        """
+        Synchronous method to upload a file. Deprecated.
+        Please use `upload_file_async` instead.
+        """
+        warnings.warn(
+            "S3Client.upload_file is deprecated and will be removed in a future version. "
+            "Use S3Client.upload_file_async instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.upload_file_async(filepath, dest)
+
+    async def upload_file_async(self, filepath: str | IOBase | BinaryIO, dest: str = "") -> S3Dest:
+        path = dest if isinstance(filepath, (IOBase, BinaryIO)) else self.buildpath(filepath, dest)
+        logger.info("upload s3 bucket='%s' file='%s' dest='%s'", self.bucket, filepath, path)
+
+        async with self.session.resource("s3", **self._boto_client_args(self.options)) as s3:
+            bucket = await s3.Bucket(self.bucket)
+            if isinstance(filepath, str):
+                await bucket.upload_file(filepath, path)
+            else:
+                await bucket.upload_fileobj(filepath, path)
 
         return S3URL(bucket=self.bucket, key=path, region=self.options.region).to_model()
 
@@ -60,15 +97,59 @@ class S3Client:
             path = path.lstrip("/")
         return S3URL(bucket=self.bucket, key=path)
 
-    def download_file(self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO) -> str | IOBase | BinaryIO:
+    @make_sync
+    async def download_file(self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO) -> str | IOBase | BinaryIO:
+        """
+        Synchronous method to download a file. Deprecated.
+        Please use `download_file_async` instead.
+        """
+        warnings.warn(
+            "S3Client.download_file is deprecated and will be removed in a future version. "
+            "Use S3Client.download_file_async instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.download_file_async(s3url, dest)
+
+    async def download_file_async(self, s3url: S3Dest, dest: str | Path | IOBase | BinaryIO) -> str | IOBase | BinaryIO:
         logger.info("download uri='%s', dest='%s'", s3url.url, dest)
-        if isinstance(dest, str | Path):
-            self.client.Bucket(s3url.bucket).download_file(s3url.key, str(dest))
-        else:
-            self.client.Bucket(s3url.bucket).download_fileobj(s3url.key, dest)
+        async with self.session.resource("s3", **self._boto_client_args(self.options)) as s3:
+            bucket = await s3.Bucket(s3url.bucket)
+            if isinstance(dest, str | Path):
+                await bucket.download_file(s3url.key, str(dest))
+            else:
+                await bucket.download_fileobj(s3url.key, dest)
         return dest
 
-    def copy_s3_to_s3(
+    @make_sync
+    async def copy_s3_to_s3(
+        self,
+        *,
+        src_bucket: str,
+        src_path: str,
+        dest_bucket: str,
+        dest_prefix: str = "",
+        name_only: bool = False,
+    ) -> tuple[S3Dest, S3Dest]:
+        """
+        Synchronous method to copy a file between S3 locations. Deprecated.
+        Please use `copy_s3_to_s3_async` instead.
+        """
+        warnings.warn(
+            "S3Client.copy_s3_to_s3 is deprecated and will be removed in a future version. "
+            "Use S3Client.copy_s3_to_s3_async instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.copy_s3_to_s3_async(
+            src_bucket=src_bucket,
+            src_path=src_path,
+            dest_bucket=dest_bucket,
+            dest_prefix=dest_prefix,
+            name_only=name_only,
+        )
+
+    async def copy_s3_to_s3_async(
         self,
         *,
         src_bucket: str,
@@ -87,7 +168,8 @@ class S3Client:
         else:
             dest_path = f"{dest_prefix}{Path(src_path).name}"
 
-        self.client.meta.client.copy(copy_source, dest_bucket, dest_path)
+        async with self.session.client("s3", **self._boto_client_args(self.options)) as client:
+            await client.copy(copy_source, dest_bucket, dest_path)
 
         return (
             S3URL(bucket=src_bucket, key=src_path, region=self.options.region).to_model(),

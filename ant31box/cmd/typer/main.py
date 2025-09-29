@@ -1,6 +1,7 @@
 import typer
 
 from .default_config import app as default_config_app
+from .seed import app as seed_app
 from .server import app as server_app
 from .version import app as version_app
 
@@ -10,6 +11,7 @@ def main() -> None:
     app.add_typer(default_config_app)
     app.add_typer(server_app)
     app.add_typer(version_app)
+    app.add_typer(seed_app, name="seed")
 
     # Parse cmd-line arguments and options
     # pylint: disable=no-value-for-parameter

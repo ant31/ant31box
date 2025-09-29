@@ -108,21 +108,22 @@ class DownloadClient(BaseClient):
         fd = FileInfo(filename=filename, path=dest_path, source=url)
         return fd
 
-    def download_s3(self, source: str, dest_dir: str | Path = "", output: str | Path | IOBase = "") -> FileInfo:
+    async def download_s3(self, source: str, dest_dir: str | Path = "", output: str | Path | IOBase = "") -> FileInfo:
         s3url = S3URL(url=source)
         fd = FileInfo(source=source, filename=s3url.filename, metadata=s3url.to_dict())
         if self.s3 is None:
             raise AttributeError("S3 client is not set")
         if not output:
             output = Path(dest_dir).joinpath(s3url.filename)
-        if output and hasattr(output, "write"):
+
+        if hasattr(output, "write"):
             # write to file-like object
-            self.s3.download_file(s3url=s3url.to_model(), dest=output)
+            await self.s3.download_file_async(s3url=s3url.to_model(), dest=output)
             fd.content = output
-        if output and isinstance(output, Path | str):
+        elif isinstance(output, Path | str):
             # write to file on disk
-            with open(str(output), "wb") as fileobj:
-                self.s3.download_file(s3url=s3url.to_model(), dest=fileobj)
+            async with aiofiles.open(str(output), "wb") as fileobj:
+                await self.s3.download_file_async(s3url=s3url.to_model(), dest=fileobj)
             fd.path = output
         return fd
 
@@ -140,5 +141,5 @@ class DownloadClient(BaseClient):
         if parsedurl.scheme in ["http", "https"]:
             return await self.download_file(url=source, source_path=parsedurl.path, dest_dir=dest_dir, output=output)
         if parsedurl.scheme in ["s3"]:
-            return self.download_s3(source=source, dest_dir=dest_dir, output=output)
+            return await self.download_s3(source=source, dest_dir=dest_dir, output=output)
         raise AttributeError(f"Unsupported file source: scheme={parsedurl.scheme} - path={parsedurl.path}")

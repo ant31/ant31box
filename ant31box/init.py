@@ -6,7 +6,7 @@ import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 
-from ant31box.config import ConfigSchema, SentryConfigSchema
+from ant31box.config import Config, ConfigSchema, SentryConfigSchema
 
 
 def init_sentry(config: SentryConfigSchema, integration_app: str = ""):
@@ -30,5 +30,14 @@ def _create_tmp_dir(promdir: str) -> None:
 
 
 def init(config: ConfigSchema, app: str = "fastapi"):
+    _create_tmp_dir(config.app.prometheus_dir)
+    init_sentry(config.sentry, app)
+
+
+def init_from_config(config: Config, app: str = "fastapi"):
+    """
+    Initialize the application from a Config object.
+    This is the recommended way for initialization.
+    """
     _create_tmp_dir(config.app.prometheus_dir)
     init_sentry(config.sentry, app)
