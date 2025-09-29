@@ -126,7 +126,7 @@ ENVPREFIX = "ANT31BOX"
 
 
 class S3ConfigSchema(BaseConfig):
-    endpoint: str = Field(default="https://s3.eu-central-1.amazonaws.com")
+    endpoint: str | None = Field(default=None)
     access_key: str = Field(default="")
     secret_key: str = Field(default="")
     region: str = Field(default="eu-central-1")

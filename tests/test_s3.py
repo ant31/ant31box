@@ -44,43 +44,57 @@ def test_s3url_parse():
 
 
 @pytest.mark.asyncio
-async def test_s3_upload_from_file(moto_patch_session):
-    client = S3Client(S3ConfigSchema(secret_key="a", access_key="a", region="us-east-1"))
+async def test_s3_upload_from_file(aioboto3_s3_client):
+    config = S3ConfigSchema(
+        secret_key="a", access_key="a", region="us-east-1", endpoint=aioboto3_s3_client.meta.endpoint_url
+    )
+    client = S3Client(config)
+    await aioboto3_s3_client.create_bucket(Bucket=client.bucket)
+
     with NamedTemporaryFile() as tmp:
         tmp.write(b"test")
         tmp.seek(0)
         dest = "toto/test.pdf"
-
-        async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
-            await s3_client.create_bucket(Bucket=client.bucket)
-
         # from filepath
         a = await client.upload_file_async(filepath=tmp.name, dest=dest)
         assert a.url == f"s3://{client.bucket}/{dest}"
 
 
 @pytest.mark.asyncio
-async def test_s3_upload_from_file_nodest(moto_patch_session):
-    client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a", region="us-east-1"))
+async def test_s3_upload_from_file_nodest(aioboto3_s3_client):
+    config = S3ConfigSchema(
+        prefix="titi/",
+        secret_key="a",
+        access_key="a",
+        region="us-east-1",
+        endpoint=aioboto3_s3_client.meta.endpoint_url,
+    )
+    client = S3Client(config)
+    await aioboto3_s3_client.create_bucket(Bucket=client.bucket)
+
     with NamedTemporaryFile() as tmp:
         tmp.write(b"test")
         tmp.seek(0)
-        async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
-            await s3_client.create_bucket(Bucket=client.bucket)
-
         # from filepath
         a = await client.upload_file_async(filepath=tmp.name)
         assert a.url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
 
 
 @pytest.mark.asyncio
-async def test_s3_download_to_file(moto_patch_session):
-    client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a", region="us-east-1"))
+async def test_s3_download_to_file(aioboto3_s3_client):
+    config = S3ConfigSchema(
+        prefix="titi/",
+        secret_key="a",
+        access_key="a",
+        region="us-east-1",
+        endpoint=aioboto3_s3_client.meta.endpoint_url,
+    )
+    client = S3Client(config)
+    await aioboto3_s3_client.create_bucket(Bucket=client.bucket)
+
     with NamedTemporaryFile() as tmp:
         tmp.write(b"test")
         tmp.seek(0)
-        async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
-            await s3_client.create_bucket(Bucket=client.bucket)
         # from filepath
         a = await client.upload_file_async(filepath=tmp.name)
         assert a.url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
@@ -94,12 +108,20 @@ async def test_s3_download_to_file(moto_patch_session):
 
 
 @pytest.mark.asyncio
-async def test_s3_copy_s3_s3(moto_patch_session):
-    client = S3Client(S3ConfigSchema(prefix="titi/", secret_key="a", access_key="a", region="us-east-1"))
+async def test_s3_copy_s3_s3(aioboto3_s3_client):
+    config = S3ConfigSchema(
+        prefix="titi/",
+        secret_key="a",
+        access_key="a",
+        region="us-east-1",
+        endpoint=aioboto3_s3_client.meta.endpoint_url,
+    )
+    client = S3Client(config)
     bucket2 = "bucketcopy"
-    async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
-        await s3_client.create_bucket(Bucket=client.bucket)
-        await s3_client.create_bucket(Bucket=bucket2)
+
+    await aioboto3_s3_client.create_bucket(Bucket=client.bucket)
+    await aioboto3_s3_client.create_bucket(Bucket=bucket2)
+
     with NamedTemporaryFile() as tmp:
         tmp.write(b"test")
         tmp.seek(0)
@@ -109,7 +131,7 @@ async def test_s3_copy_s3_s3(moto_patch_session):
         src_bucket=src.bucket, src_path=src.key, dest_bucket=bucket2, dest_prefix="copy/"
     )
     assert res[0].url == f"s3://{client.bucket}/titi/{Path(tmp.name).name}"
-    assert res[1].url == f"s://{bucket2}/copy/titi/{Path(tmp.name).name}"
+    assert res[1].url == f"s3://{bucket2}/copy/titi/{Path(tmp.name).name}"
     res = await client.copy_s3_to_s3_async(
         src_bucket=src.bucket, src_path=src.key, dest_bucket=bucket2, dest_prefix="copy/", name_only=True
     )

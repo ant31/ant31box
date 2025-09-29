@@ -162,20 +162,23 @@ async def test_filedl_file_scheme():
 
 
 @pytest.mark.asyncio
-async def test_filedl_file_scheme_file_s3(moto_patch_session):
-    client = DownloadClient()
-    client.set_s3(S3ConfigSchema(secret_key="a", access_key="a", region="us-east-1"))
+async def test_filedl_file_scheme_file_s3(aioboto3_s3_client):
+    config = S3ConfigSchema(
+        secret_key="a", access_key="a", region="us-east-1", endpoint=aioboto3_s3_client.meta.endpoint_url
+    )
+    client = DownloadClient(s3_config=config)
+
+    await aioboto3_s3_client.create_bucket(Bucket=client.s3.bucket)
 
     dir = mkdtemp()
     with NamedTemporaryFile() as tmp:
         tmp.write(b"test")
         tmp.seek(0)
         dest = "toto/test.pdf"
-        async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
-            await s3_client.create_bucket(Bucket=client.s3.bucket)
-        await client.s3.upload_file_async(filepath=tmp, dest=dest)
+        await client.s3.upload_file_async(filepath=tmp.name, dest=dest)
         uri = f"s3://{client.s3.bucket}/{dest}"
         resp = await client.download(source=uri, dest_dir=dir)
+
     assert isinstance(resp, FileInfo)
     with open(str(resp.path), "rb") as f:
         assert f.read() == b"test"
@@ -187,18 +190,19 @@ async def test_filedl_file_scheme_file_s3(moto_patch_session):
 
 
 @pytest.mark.asyncio
-async def test_filedl_file_scheme_output_s3(moto_patch_session):
-    client = DownloadClient()
-    client.set_s3(S3ConfigSchema(secret_key="a", access_key="a", region="us-east-1"))
+async def test_filedl_file_scheme_output_s3(aioboto3_s3_client):
+    config = S3ConfigSchema(
+        secret_key="a", access_key="a", region="us-east-1", endpoint=aioboto3_s3_client.meta.endpoint_url
+    )
+    client = DownloadClient(s3_config=config)
+    await aioboto3_s3_client.create_bucket(Bucket=client.s3.bucket)
 
     with NamedTemporaryFile() as tmp:
         tmp.write(b"test")
         tmp.seek(0)
         dest = "toto/test.pdf"
+        await client.s3.upload_file_async(filepath=tmp.name, dest=dest)
 
-        async with aioboto3.Session().client("s3", region_name="us-east-1") as s3_client:
-            await s3_client.create_bucket(Bucket=client.s3.bucket)
-        await client.s3.upload_file_async(filepath=tmp, dest=dest)
     with NamedTemporaryFile() as output:
         uri = f"s3://{client.s3.bucket}/{dest}"
         resp = await client.download(source=uri, dest_dir="", output=output)
