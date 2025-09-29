@@ -42,8 +42,8 @@ This document outlines the development roadmap to elevate `ant31box` into a robu
 
 **Goal:** Create outstanding documentation and clear usage patterns that make `ant31box` a pleasure to use.
 
--   [ ] **Create a "Quickstart" / "Getting Started" Guide:**
-    -   [ ] Write a tutorial in the `README.md` or a new `docs/getting_started.md` that walks a developer through bootstrapping a brand new microservice, from setting up the config to creating a custom API endpoint.
+-   [x] **Create a "Quickstart" / "Getting Started" Guide:**
+    -   [x] Write a tutorial in the `README.md` that walks a developer through bootstrapping a brand new microservice, from setting up the config to creating a custom API endpoint.
 
 -   [ ] **Write In-Depth Guides for Core Features:**
     -   [ ] **Configuration:** A detailed guide on extending `ConfigSchema`, the file and environment variable loading hierarchy, and best practices.
