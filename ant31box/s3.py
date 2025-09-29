@@ -1,13 +1,16 @@
 import logging
+import warnings
 from io import IOBase
 from pathlib import Path
 from typing import BinaryIO
 
 import aioboto3
+import boto3
 from botocore.client import Config
 
+from ant31box.asyncutils import make_sync
 from ant31box.config import S3ConfigSchema
-from ant31box.models import S3URL, S3Dest
+from ant31box.models import S3Dest, S3URL
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -22,6 +25,21 @@ class S3Client:
             prefix = options.prefix
         self.bucket: str = bucket
         self.prefix: str = prefix
+
+    @property
+    def sync_client(self):
+        """Provides a synchronous boto3 client for backward compatibility."""
+        kwargs: dict = {}
+        if self.options.endpoint:
+            kwargs["endpoint_url"] = self.options.endpoint
+        if self.options.region:
+            kwargs["region_name"] = self.options.region
+        if self.options.access_key:
+            kwargs["aws_access_key_id"] = self.options.access_key
+        if self.options.secret_key:
+            kwargs["aws_secret_access_key"] = self.options.secret_key
+        kwargs["config"] = Config(signature_version="s3v4")
+        return boto3.resource("s3", **kwargs)
 
     @staticmethod
     def _boto_session_args(options: S3ConfigSchema):
