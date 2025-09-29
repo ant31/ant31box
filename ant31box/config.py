@@ -225,9 +225,9 @@ class GenericConfig[TBaseConfig: BaseSettings]:
         # Pydantic-settings loads from environment variables automatically on instantiation.
         env_config = cls.__config_class__().model_dump(exclude_unset=True, exclude_defaults=True)
 
-        # Merge the YAML config into the environment variable config.
+        # Merge the environment variable config into the YAML config.
         # This ensures that environment variables take precedence.
-        merged_config = deepmerge(yaml_config, env_config)
+        merged_config = deepmerge(env_config, yaml_config)
         logger.debug("Config loaded from %s: %s", file_path, merged_config)
 
         return cls(cls.__config_class__.model_validate(merged_config))
