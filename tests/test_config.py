@@ -55,6 +55,14 @@ def test_config_env_precedence(monkeypatch):
     assert config(reload=True).conf.app.env == "test"
 
 
+def test_config_name_from_env(monkeypatch):
+    assert config(reload=True).name == "ant31box-test"
+    monkeypatch.setattr(
+        os, "environ", {"ANT31BOX_NAME": "my-app-from-env", "ANT31BOX_CONFIG": "tests/data/test_config.yaml"}
+    )
+    assert config(reload=True).name == "my-app-from-env"
+
+
 def test_config_path_failed_path_fallback():
     config("tests/data/config-dontexist.yaml", reload=True)
     assert config().app.env == "dev"
