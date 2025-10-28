@@ -9,7 +9,7 @@ from uvicorn.importer import import_from_string
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from ant31box.config import Config, FastAPIConfigSchema, config
-from ant31box.db import get_engine
+from ant31box.db import AchemyEngine, get_engine
 from ant31box.init import init_from_config
 
 from .middlewares.errors import catch_exceptions_middleware
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     Initializes the engine on startup and disposes of it on shutdown.
     This is only active if the 'achemy' package is installed.
     """
-    if get_engine is None:
+    if AchemyEngine is None:
         # If achemy is not installed, do nothing.
         yield
         return
