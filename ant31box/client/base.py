@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import contextlib
 import json
 import logging
@@ -79,11 +80,36 @@ class BaseClient:
 
     @property
     def session(self) -> aiohttp.ClientSession:
-        """An instance of aiohttp.ClientSession"""
-        if not self._session or self._session.closed or not self._session._loop or self._session._loop.is_closed():
+        """An instance of aiohttp.ClientSession that auto-recreates for different event loops."""
+        try:
+            current_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            # No event loop running
+            current_loop = None
+
+        # Check if session exists and is valid for current loop
+        needs_new_session = (
+            not self._session
+            or self._session.closed
+            or not self._session._loop
+            or self._session._loop.is_closed()
+            or (current_loop and self._session._loop != current_loop)
+        )
+
+        if needs_new_session:
+            # Close old session if it exists and is from a different loop
+            if self._session and not self._session.closed:
+                # Sync close to avoid event loop issues
+                try:
+                    if self._session._connector:
+                        self._session._connector._close()
+                except Exception:  # pylint: disable=broad-exception-caught
+                    pass
+
             self._session = aiohttp.ClientSession(
                 *self.client_config.session_args[0], **self.client_config.session_args[1]
             )
+
         return self._session
 
     # pylint: disable=too-many-arguments
