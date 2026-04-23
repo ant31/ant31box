@@ -34,6 +34,7 @@ class BaseClient:
         client_name: str = "client",
     ) -> None:
         self._session: httpx.AsyncClient | None = None
+        self._background_tasks: set[asyncio.Task] = set()
         self.client_config = ClientConfig(
             endpoint=endpoint, verify_tls=verify_tls, session_args=session_args, client_name=client_name
         )
@@ -66,7 +67,9 @@ class BaseClient:
             if not self._session.is_closed:
                 try:
                     loop = asyncio.get_running_loop()
-                    loop.create_task(self._session.aclose())
+                    task = loop.create_task(self._session.aclose())
+                    self._background_tasks.add(task)
+                    task.add_done_callback(self._background_tasks.discard)
                 except RuntimeError:
                     pass
             self._session = None
