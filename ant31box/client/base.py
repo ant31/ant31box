@@ -83,6 +83,7 @@ class BaseClient:
             self._session = httpx.AsyncClient(
                 *self.client_config.session_args[0],
                 verify=self.client_config.verify_tls,
+                follow_redirects=True,
                 **self.client_config.session_args[1]
             )
 
