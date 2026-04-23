@@ -77,17 +77,14 @@ class BaseClient:
     @property
     def session(self) -> httpx.AsyncClient:
         """An instance of httpx.AsyncClient that auto-recreates for different event loops."""
-        needs_new_session = (
-            not self._session
-            or self._session.is_closed
-        )
+        needs_new_session = not self._session or self._session.is_closed
 
         if needs_new_session:
             self._session = httpx.AsyncClient(
                 *self.client_config.session_args[0],
                 verify=self.client_config.verify_tls,
                 follow_redirects=True,
-                **self.client_config.session_args[1]
+                **self.client_config.session_args[1],
             )
 
         return self._session
