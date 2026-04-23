@@ -2,7 +2,7 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryFile, mkdtemp
 
-import aiohttp
+import httpx
 import pytest
 
 from ant31box.client.filedl import DownloadClient, FileInfo
@@ -10,12 +10,12 @@ from ant31box.config import S3ConfigSchema
 
 
 @pytest.mark.asyncio
-async def test_filedl_http_temp(aioresponses):
+async def test_filedl_http_temp(httpx_mock):
     path = "http://example.com/test.pdf"
-    aioresponses.get(
-        path,
-        status=200,
-        body=b"test",
+    httpx_mock.add_response(
+        url=path,
+        status_code=200,
+        content=b"test",
     )
     client = DownloadClient()
     with TemporaryFile() as tmp:
@@ -30,12 +30,12 @@ async def test_filedl_http_temp(aioresponses):
 
 
 @pytest.mark.asyncio
-async def test_filedl_http_file(aioresponses):
+async def test_filedl_http_file(httpx_mock):
     path = "http://example.com/test.pdf"
-    aioresponses.get(
-        path,
-        status=200,
-        body=b"test",
+    httpx_mock.add_response(
+        url=path,
+        status_code=200,
+        content=b"test",
     )
     client = DownloadClient()
     with NamedTemporaryFile() as tmp:
@@ -50,12 +50,12 @@ async def test_filedl_http_file(aioresponses):
 
 
 @pytest.mark.asyncio
-async def test_filedl_http_todir_file(aioresponses):
+async def test_filedl_http_todir_file(httpx_mock):
     path = "http://example.com/test.pdf"
-    aioresponses.get(
-        path,
-        status=200,
-        body=b"test",
+    httpx_mock.add_response(
+        url=path,
+        status_code=200,
+        content=b"test",
     )
     dir = mkdtemp()
     client = DownloadClient()
@@ -71,12 +71,12 @@ async def test_filedl_http_todir_file(aioresponses):
 
 
 @pytest.mark.asyncio
-async def test_filedl_http_todir(aioresponses):
+async def test_filedl_http_todir(httpx_mock):
     path = "http://example.com/test.pdf"
-    aioresponses.get(
-        path,
-        status=200,
-        body=b"test",
+    httpx_mock.add_response(
+        url=path,
+        status_code=200,
+        content=b"test",
     )
     dir = mkdtemp()
     client = DownloadClient()
@@ -92,26 +92,26 @@ async def test_filedl_http_todir(aioresponses):
 
 
 @pytest.mark.asyncio
-async def test_filedl_404(aioresponses):
+async def test_filedl_404(httpx_mock):
     path = "https://example.com/test.pdf2"
-    aioresponses.get(
-        path,
-        status=404,
-        body=b"",
+    httpx_mock.add_response(
+        url=path,
+        status_code=404,
+        content=b"",
     )
     client = DownloadClient()
-    with TemporaryFile() as tmp, pytest.raises(aiohttp.ClientResponseError) as excinfo:
+    with TemporaryFile() as tmp, pytest.raises(httpx.HTTPStatusError) as excinfo:
         await client.download(source=path, output=tmp)
-    assert excinfo.value.status == 404
+    assert excinfo.value.response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_filedl_https_temp(aioresponses):
+async def test_filedl_https_temp(httpx_mock):
     path = "https://example.com/test.pdf"
-    aioresponses.get(
-        path,
-        status=200,
-        body=b"test",
+    httpx_mock.add_response(
+        url=path,
+        status_code=200,
+        content=b"test",
     )
     client = DownloadClient()
 
