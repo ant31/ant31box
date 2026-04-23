@@ -6,7 +6,7 @@ import logging
 from typing import Any, Literal, TypeVar
 from urllib.parse import ParseResult, urlparse
 
-import aiohttp
+import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
 from ant31box.version import VERSION
@@ -33,7 +33,7 @@ class BaseClient:
         session_args: tuple[list, dict[str, Any]] = ([], {}),
         client_name: str = "client",
     ) -> None:
-        self._session: aiohttp.ClientSession | None = None
+        self._session: httpx.AsyncClient | None = None
         self.client_config = ClientConfig(
             endpoint=endpoint, verify_tls=verify_tls, session_args=session_args, client_name=client_name
         )
@@ -57,80 +57,57 @@ class BaseClient:
 
     def close(self):
         """
-        Close aiohttp.ClientSession.
+        Close httpx.AsyncClient.
 
         This is useful to be called manually in tests if each test when each test uses a new loop. After close, new
         requests will automatically create a new session.
-
-        Note: We need a sync version for `__del__` and `aiohttp.ClientSession.close()` is async even though it doesn't
-        have to be.
         """
         if self._session:
-            if not self._session.closed:
-                # Older aiohttp does not have _connector_owner
-                if not hasattr(self._session, "_connector_owner") or self._session._connector_owner:
-                    try:
-                        if self._session._connector:
-                            self._session._connector._close()  # New version returns a coroutine in close() as warning
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        if self._session._connector:
-                            self._session._connector.close()
-                self._session._connector = None
+            if not self._session.is_closed:
+                try:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(self._session.aclose())
+                except RuntimeError:
+                    pass
             self._session = None
 
     @property
-    def session(self) -> aiohttp.ClientSession:
-        """An instance of aiohttp.ClientSession that auto-recreates for different event loops."""
-        try:
-            current_loop = asyncio.get_running_loop()
-        except RuntimeError:
-            # No event loop running
-            current_loop = None
-
-        # Check if session exists and is valid for current loop
+    def session(self) -> httpx.AsyncClient:
+        """An instance of httpx.AsyncClient that auto-recreates for different event loops."""
         needs_new_session = (
             not self._session
-            or self._session.closed
-            or not self._session._loop
-            or self._session._loop.is_closed()
-            or (current_loop and self._session._loop != current_loop)
+            or self._session.is_closed
         )
 
         if needs_new_session:
-            # Close old session if it exists and is from a different loop
-            if self._session and not self._session.closed:
-                # Sync close to avoid event loop issues
-                try:
-                    if self._session._connector:
-                        self._session._connector._close()
-                except Exception:  # pylint: disable=broad-exception-caught
-                    pass
-
-            self._session = aiohttp.ClientSession(
-                *self.client_config.session_args[0], **self.client_config.session_args[1]
+            self._session = httpx.AsyncClient(
+                *self.client_config.session_args[0],
+                verify=self.client_config.verify_tls,
+                **self.client_config.session_args[1]
             )
 
         return self._session
 
     # pylint: disable=too-many-arguments
-    async def log_request(self, resp: aiohttp.ClientResponse) -> None:
+    async def log_request(self, resp: httpx.Response) -> None:
         try:
-            raw = await resp.read()
-        except aiohttp.ClientPayloadError:
+            await resp.aread()
+            raw = resp.content
+        except Exception:
             raw = b""
         with contextlib.suppress(Exception):
             logger.debug(
                 json.dumps(
                     {
                         "query": {
-                            "url": str(resp.request_info.url),
-                            "method": resp.request_info.method,
-                            "headers": dict(resp.request_info.headers.items()),
+                            "url": str(resp.request.url),
+                            "method": resp.request.method,
+                            "headers": dict(resp.request.headers.items()),
                         },
                         "response": {
                             "headers": dict(resp.headers.items()),
-                            "status": resp.status,
-                            "raw": raw.decode("utf-8"),
+                            "status": resp.status_code,
+                            "raw": raw.decode("utf-8", errors="replace"),
                         },
                     },
                     default=str,

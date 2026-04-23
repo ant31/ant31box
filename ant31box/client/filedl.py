@@ -93,7 +93,7 @@ class DownloadClient(BaseClient):
         if not filename:
             filename = unquote(Path(source_path).name)
 
-        content = await resp.content.read()
+        content = resp.content
 
         if output and isinstance(output, IOBase):
             output.write(content)
